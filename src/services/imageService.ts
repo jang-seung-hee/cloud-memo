@@ -1,6 +1,5 @@
 import type { Image, ImageUploadResponse } from '../types/image';
 import { 
-  STORAGE_KEYS, 
   ERROR_MESSAGES, 
   STORAGE_LIMITS,
   generateId, 
@@ -16,7 +15,7 @@ import {
   uploadFile
 } from './firebaseService';
 
-// 이미지 데이터 검증
+// ?��?지 ?�이??검�?
 const validateImage = (image: Partial<Image>): boolean => {
   if (!image.data || image.data.length === 0) {
     return false;
@@ -33,35 +32,34 @@ const validateImage = (image: Partial<Image>): boolean => {
   return true;
 };
 
-// Base64 데이터 크기 계산
+// Base64 ?�이???�기 계산
 const getBase64Size = (base64String: string): number => {
   const padding = base64String.endsWith('==') ? 2 : base64String.endsWith('=') ? 1 : 0;
   return (base64String.length * 3) / 4 - padding;
 };
 
-// 이미지 목록 가져오기
+// ?��?지 목록 가?�오�?
 const getImages = (): Image[] => {
   if (!isStorageAvailable()) {
     throw new StorageError(ERROR_MESSAGES.STORAGE_NOT_AVAILABLE, 'STORAGE_NOT_AVAILABLE');
   }
 
   try {
-    // const imagesJson = localStorage.getItem(STORAGE_KEYS.IMAGES);
     // if (!imagesJson) {
     //   return [];
     // }
 
     // const images = safeJsonParse<Image[]>(imagesJson, []);
     // return Array.isArray(images) ? images : [];
-    console.log('로컬스토리지 사용하지 않음, 빈 배열 반환');
+    console.log('로컬?�토리�? ?�용?��? ?�음, �?배열 반환');
     return [];
   } catch (error) {
-    console.error('이미지 목록 가져오기 실패:', error);
+    console.error('?��?지 목록 가?�오�??�패:', error);
     return [];
   }
 };
 
-// 이미지 저장
+// ?��?지 ?�??
 const saveImage = async (file: File): Promise<ImageUploadResponse> => {
   if (!isStorageAvailable()) {
     throw new StorageError(ERROR_MESSAGES.STORAGE_NOT_AVAILABLE, 'STORAGE_NOT_AVAILABLE');
@@ -72,7 +70,7 @@ const saveImage = async (file: File): Promise<ImageUploadResponse> => {
   }
 
   if (!file.type.startsWith('image/')) {
-    throw new StorageError('이미지 파일만 업로드 가능합니다.', 'INVALID_FILE_TYPE');
+    throw new StorageError('?��?지 ?�일�??�로??가?�합?�다.', 'INVALID_FILE_TYPE');
   }
 
   return new Promise((resolve, reject) => {
@@ -112,17 +110,16 @@ const saveImage = async (file: File): Promise<ImageUploadResponse> => {
         images.push(newImage);
         const imagesJson = safeJsonStringify(images);
         if (imagesJson) {
-          // localStorage.setItem(STORAGE_KEYS.IMAGES, imagesJson);
         }
 
-        // Firebase Storage 동기화 (인증된 사용자인 경우)
+        // Firebase Storage ?�기??(?�증???�용?�인 경우)
         if (isFirebaseAvailable() && getCurrentUserId()) {
           try {
-            // Firebase Storage에 직접 업로드
+            // Firebase Storage??직접 ?�로??
             await uploadFile(file, 'images');
           } catch (syncError) {
-            console.warn('Firebase Storage 동기화 실패 (이미지 업로드):', syncError);
-            // 동기화 실패해도 로컬 저장은 성공으로 처리
+            console.warn('Firebase Storage ?�기???�패 (?��?지 ?�로??:', syncError);
+            // ?�기???�패?�도 로컬 ?�?��? ?�공?�로 처리
           }
         }
 
@@ -136,20 +133,20 @@ const saveImage = async (file: File): Promise<ImageUploadResponse> => {
     };
 
     reader.onerror = () => {
-      reject(new StorageError('파일 읽기 실패', 'FILE_READ_ERROR'));
+      reject(new StorageError('?�일 ?�기 ?�패', 'FILE_READ_ERROR'));
     };
 
     reader.readAsDataURL(file);
   });
 };
 
-// 이미지 조회
+// ?��?지 조회
 const getImage = (id: string): Image | null => {
   const images = getImages();
   return images.find(image => image.id === id) || null;
 };
 
-// 이미지 삭제
+// ?��?지 ??��
 const deleteImage = (id: string): boolean => {
   if (!isStorageAvailable()) {
     throw new StorageError(ERROR_MESSAGES.STORAGE_NOT_AVAILABLE, 'STORAGE_NOT_AVAILABLE');
@@ -166,7 +163,6 @@ const deleteImage = (id: string): boolean => {
     images.splice(imageIndex, 1);
     const imagesJson = safeJsonStringify(images);
     if (imagesJson) {
-      // localStorage.setItem(STORAGE_KEYS.IMAGES, imagesJson);
     }
     return true;
   } catch (error) {
@@ -174,11 +170,11 @@ const deleteImage = (id: string): boolean => {
   }
 };
 
-// 이미지 다운로드
+// ?��?지 ?�운로드
 const downloadImage = (id: string): void => {
   const image = getImage(id);
   if (!image) {
-    throw new StorageError('이미지를 찾을 수 없습니다.', 'IMAGE_NOT_FOUND');
+    throw new StorageError('?��?지�?찾을 ???�습?�다.', 'IMAGE_NOT_FOUND');
   }
 
   try {
@@ -189,11 +185,11 @@ const downloadImage = (id: string): void => {
     link.click();
     document.body.removeChild(link);
   } catch (error) {
-    throw new StorageError('이미지 다운로드 실패', 'DOWNLOAD_ERROR');
+    throw new StorageError('?��?지 ?�운로드 ?�패', 'DOWNLOAD_ERROR');
   }
 };
 
-// 이미지 통계
+// ?��?지 ?�계
 const getImageStats = () => {
   const images = getImages();
   const totalImages = images.length;
@@ -213,7 +209,7 @@ const getImageStats = () => {
   };
 };
 
-// 사용되지 않는 이미지 정리
+// ?�용?��? ?�는 ?��?지 ?�리
 const cleanupUnusedImages = (usedImageIds: string[]): number => {
   if (!isStorageAvailable()) {
     throw new StorageError(ERROR_MESSAGES.STORAGE_NOT_AVAILABLE, 'STORAGE_NOT_AVAILABLE');
@@ -231,7 +227,6 @@ const cleanupUnusedImages = (usedImageIds: string[]): number => {
     const remainingImages = images.filter(image => usedIds.has(image.id));
     const imagesJson = safeJsonStringify(remainingImages);
     if (imagesJson) {
-      // localStorage.setItem(STORAGE_KEYS.IMAGES, imagesJson);
     }
     return unusedImages.length;
   } catch (error) {
@@ -239,7 +234,7 @@ const cleanupUnusedImages = (usedImageIds: string[]): number => {
   }
 };
 
-// 이미지 압축 (Base64 크기 줄이기)
+// ?��?지 ?�축 (Base64 ?�기 줄이�?
 const compressImage = (base64Data: string, quality: number = 0.8): Promise<string> => {
   return new Promise((resolve, reject) => {
     const img = new globalThis.Image();
@@ -249,7 +244,7 @@ const compressImage = (base64Data: string, quality: number = 0.8): Promise<strin
         const ctx = canvas.getContext('2d');
         
         if (!ctx) {
-          reject(new StorageError('Canvas 컨텍스트를 생성할 수 없습니다.', 'CANVAS_ERROR'));
+          reject(new StorageError('Canvas 컨텍?�트�??�성?????�습?�다.', 'CANVAS_ERROR'));
           return;
         }
 
@@ -260,25 +255,25 @@ const compressImage = (base64Data: string, quality: number = 0.8): Promise<strin
         const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
         resolve(compressedDataUrl);
       } catch (error) {
-        reject(new StorageError('이미지 압축 실패', 'COMPRESSION_ERROR'));
+        reject(new StorageError('?��?지 ?�축 ?�패', 'COMPRESSION_ERROR'));
       }
     };
 
     img.onerror = () => {
-      reject(new StorageError('이미지 로드 실패', 'IMAGE_LOAD_ERROR'));
+      reject(new StorageError('?��?지 로드 ?�패', 'IMAGE_LOAD_ERROR'));
     };
 
     img.src = base64Data;
   });
 };
 
-// 이미지 백업
+// ?��?지 백업
 const exportImages = (): string => {
   const images = getImages();
   return safeJsonStringify(images) || '[]';
 };
 
-// 이미지 복원
+// ?��?지 복원
 const importImages = (jsonData: string): number => {
   if (!isStorageAvailable()) {
     throw new StorageError(ERROR_MESSAGES.STORAGE_NOT_AVAILABLE, 'STORAGE_NOT_AVAILABLE');
@@ -291,7 +286,7 @@ const importImages = (jsonData: string): number => {
       throw new StorageError(ERROR_MESSAGES.INVALID_DATA, 'INVALID_DATA');
     }
 
-    // 데이터 검증
+    // ?�이??검�?
     const validImages = importedImages.filter(image => validateImage(image));
     
     const dataSize = safeJsonStringify(validImages)?.length || 0;
@@ -301,7 +296,6 @@ const importImages = (jsonData: string): number => {
 
     const imagesJson = safeJsonStringify(validImages);
     if (imagesJson) {
-      // localStorage.setItem(STORAGE_KEYS.IMAGES, imagesJson);
     }
 
     return validImages.length;

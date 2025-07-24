@@ -4,7 +4,6 @@ import { Button, Icon, BottomTabBar } from '../ui';
 import type { IconName } from '../ui/Icon';
 import LoginButton from '../ui/LoginButton';
 import UserProfile from '../ui/UserProfile';
-import SyncStatus from '../ui/SyncStatus';
 
 interface HeaderProps {
   className?: string;
@@ -15,17 +14,17 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // 메뉴 토글
+  // 메뉴 ?��?
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  // 메뉴 닫기
+  // 메뉴 ?�기
   const closeMenu = () => {
     setIsMenuOpen(false);
   };
 
-  // 탭 설정
+  // ???�정
   const tabs = [
     {
       id: 'memos',
@@ -35,13 +34,13 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
     },
     {
       id: 'new-memo',
-      label: '새 메모',
+      label: '??메모',
       icon: 'Plus' as IconName,
       isActive: false
     }
   ];
 
-  // 탭 변경 처리
+  // ??변�?처리
   const handleTabChange = (tabId: string) => {
     if (tabId === 'memos') {
       navigate('/');
@@ -65,16 +64,16 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
               </Link>
             </div>
 
-            {/* 데스크톱 네비게이션 */}
+            {/* ?�스?�톱 ?�비게이??*/}
             <nav className="hidden md:flex items-center space-x-8">
-              {/* 네비게이션 링크 제거됨 */}
+              {/* ?�비게이??링크 ?�거??*/}
             </nav>
 
-            {/* 액션 버튼들 */}
+            {/* ?�션 버튼??*/}
             <div className="hidden md:flex items-center space-x-4">
-              {/* 로그인 상태 표시 */}
+              {/* 로그???�태 ?�시 */}
               <UserProfile size="sm" showEmail={false} />
-              {/* 로그아웃 및 상용구 관리 버튼을 나란히 배치 */}
+              {/* 로그?�웃 �??�용�?관�?버튼???��???배치 */}
               <div className="flex items-center space-x-2">
                 <LoginButton variant="outline" size="sm" />
                 <Button
@@ -84,12 +83,12 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
                   className="flex items-center bg-white border-blue-300 text-blue-700 hover:bg-blue-50"
                 >
                   <Icon name="Copy" size={16} />
-                  <span className="ml-2">상용구관리</span>
+                  <span className="ml-2">?�용구�?�?/span>
                 </Button>
               </div>
             </div>
 
-            {/* 모바일 메뉴 버튼 */}
+            {/* 모바??메뉴 버튼 */}
             <div className="md:hidden">
               <Button
                 onClick={toggleMenu}
@@ -102,15 +101,15 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
             </div>
           </div>
 
-          {/* 모바일 메뉴 */}
+          {/* 모바??메뉴 */}
           {isMenuOpen && (
             <div className="md:hidden">
               <div className="px-2 pt-2 pb-3 space-y-1 bg-white dark:bg-dark-card border-t border-gray-200 dark:border-dark-border">
-                {/* 로그인 상태 표시 */}
+                {/* 로그???�태 ?�시 */}
                 <div className="px-3 py-2">
                   <UserProfile size="md" />
                 </div>
-                {/* 상용구 관리 및 로그아웃 버튼을 한 행에 배치 */}
+                {/* ?�용�?관�?�?로그?�웃 버튼?????�에 배치 */}
                 <div className="px-3 py-2 flex space-x-2">
                   <Button
                     onClick={() => {
@@ -122,7 +121,7 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
                     className="flex-1 flex items-center justify-center bg-white border-blue-300 text-blue-700 hover:bg-blue-50"
                   >
                     <Icon name="Copy" size={16} />
-                    <span className="ml-2">상용구관리</span>
+                    <span className="ml-2">?�용구�?�?/span>
                   </Button>
                   <LoginButton variant="outline" size="sm" className="flex-1" />
                 </div>
@@ -132,7 +131,7 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
         </div>
       </header>
 
-      {/* 하단 고정 탭 - 모든 화면에서 표시 */}
+      {/* ?�단 고정 ??- 모든 ?�면?�서 ?�시 */}
       <BottomTabBar
         tabs={tabs}
         onTabChange={handleTabChange}
@@ -142,3 +141,6 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
 };
 
 export default Header; 
+
+
+

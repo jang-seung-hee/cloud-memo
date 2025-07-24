@@ -1,6 +1,5 @@
 import type { Template, CreateTemplateRequest, UpdateTemplateRequest, TemplateSearchParams, TemplateCategory } from '../types/template';
 import { 
-  STORAGE_KEYS, 
   ERROR_MESSAGES, 
   STORAGE_LIMITS,
   generateId, 
@@ -17,7 +16,7 @@ import {
   COLLECTIONS
 } from './firebaseService';
 
-// 상용구 데이터 검증
+// ?�용�??�이??검�?
 const validateTemplate = (template: Partial<Template>): boolean => {
   if (!template.title || template.title.trim().length === 0) {
     return false;
@@ -34,29 +33,28 @@ const validateTemplate = (template: Partial<Template>): boolean => {
   return true;
 };
 
-// 상용구 목록 가져오기
+// ?�용�?목록 가?�오�?
 const getTemplates = (): Template[] => {
   if (!isStorageAvailable()) {
     throw new StorageError(ERROR_MESSAGES.STORAGE_NOT_AVAILABLE, 'STORAGE_NOT_AVAILABLE');
   }
 
   try {
-    // const templatesJson = localStorage.getItem(STORAGE_KEYS.TEMPLATES);
     // if (!templatesJson) {
     //   return [];
     // }
 
     // const templates = safeJsonParse<Template[]>(templatesJson, []);
     // return Array.isArray(templates) ? templates : [];
-    console.log('로컬스토리지 사용하지 않음, 빈 배열 반환');
+    console.log('로컬?�토리�? ?�용?��? ?�음, �?배열 반환');
     return [];
   } catch (error) {
-    console.error('상용구 목록 가져오기 실패:', error);
+    console.error('?�용�?목록 가?�오�??�패:', error);
     return [];
   }
 };
 
-// 상용구 생성
+// ?�용�??�성
 const createTemplate = async (request: CreateTemplateRequest): Promise<Template> => {
   if (!isStorageAvailable()) {
     throw new StorageError(ERROR_MESSAGES.STORAGE_NOT_AVAILABLE, 'STORAGE_NOT_AVAILABLE');
@@ -87,17 +85,16 @@ const createTemplate = async (request: CreateTemplateRequest): Promise<Template>
     templates.push(newTemplate);
     const templatesJson = safeJsonStringify(templates);
     if (templatesJson) {
-      // localStorage.setItem(STORAGE_KEYS.TEMPLATES, templatesJson);
     }
 
-    // Firebase 동기화 (인증된 사용자인 경우)
+    // Firebase ?�기??(?�증???�용?�인 경우)
     if (isFirebaseAvailable() && getCurrentUserId()) {
       try {
-        // Firebase에 직접 저장
+        // Firebase??직접 ?�??
         await createDocument(COLLECTIONS.TEMPLATES, newTemplate);
       } catch (syncError) {
-        console.warn('Firebase 동기화 실패 (상용구 생성):', syncError);
-        // 동기화 실패해도 로컬 저장은 성공으로 처리
+        console.warn('Firebase ?�기???�패 (?�용�??�성):', syncError);
+        // ?�기???�패?�도 로컬 ?�?��? ?�공?�로 처리
       }
     }
 
@@ -107,13 +104,13 @@ const createTemplate = async (request: CreateTemplateRequest): Promise<Template>
   }
 };
 
-// 상용구 조회
+// ?�용�?조회
 const getTemplate = (id: string): Template | null => {
   const templates = getTemplates();
   return templates.find(template => template.id === id) || null;
 };
 
-// 상용구 수정
+// ?�용�??�정
 const updateTemplate = (id: string, request: UpdateTemplateRequest): Template => {
   if (!isStorageAvailable()) {
     throw new StorageError(ERROR_MESSAGES.STORAGE_NOT_AVAILABLE, 'STORAGE_NOT_AVAILABLE');
@@ -123,7 +120,7 @@ const updateTemplate = (id: string, request: UpdateTemplateRequest): Template =>
   const templateIndex = templates.findIndex(template => template.id === id);
 
   if (templateIndex === -1) {
-    throw new StorageError('상용구를 찾을 수 없습니다.', 'TEMPLATE_NOT_FOUND');
+    throw new StorageError('?�용구�? 찾을 ???�습?�다.', 'TEMPLATE_NOT_FOUND');
   }
 
   const updatedTemplate: Template = {
@@ -148,7 +145,6 @@ const updateTemplate = (id: string, request: UpdateTemplateRequest): Template =>
     templates[templateIndex] = updatedTemplate;
     const templatesJson = safeJsonStringify(templates);
     if (templatesJson) {
-      // localStorage.setItem(STORAGE_KEYS.TEMPLATES, templatesJson);
     }
     return updatedTemplate;
   } catch (error) {
@@ -156,7 +152,7 @@ const updateTemplate = (id: string, request: UpdateTemplateRequest): Template =>
   }
 };
 
-// 상용구 삭제
+// ?�용�???��
 const deleteTemplate = (id: string): boolean => {
   if (!isStorageAvailable()) {
     throw new StorageError(ERROR_MESSAGES.STORAGE_NOT_AVAILABLE, 'STORAGE_NOT_AVAILABLE');
@@ -173,7 +169,6 @@ const deleteTemplate = (id: string): boolean => {
     templates.splice(templateIndex, 1);
     const templatesJson = safeJsonStringify(templates);
     if (templatesJson) {
-      // localStorage.setItem(STORAGE_KEYS.TEMPLATES, templatesJson);
     }
     return true;
   } catch (error) {
@@ -181,7 +176,7 @@ const deleteTemplate = (id: string): boolean => {
   }
 };
 
-// 상용구 사용 횟수 증가
+// ?�용�??�용 ?�수 증�?
 const incrementUsageCount = (id: string): void => {
   if (!isStorageAvailable()) {
     throw new StorageError(ERROR_MESSAGES.STORAGE_NOT_AVAILABLE, 'STORAGE_NOT_AVAILABLE');
@@ -201,18 +196,17 @@ const incrementUsageCount = (id: string): void => {
 
     const templatesJson = safeJsonStringify(templates);
     if (templatesJson) {
-      // localStorage.setItem(STORAGE_KEYS.TEMPLATES, templatesJson);
     }
   } catch (error) {
     throw new StorageError(ERROR_MESSAGES.QUOTA_EXCEEDED, 'QUOTA_EXCEEDED');
   }
 };
 
-// 상용구 검색
+// ?�용�?검??
 const searchTemplates = (params: TemplateSearchParams): Template[] => {
   let templates = getTemplates();
 
-  // 키워드 검색
+  // ?�워??검??
   if (params.keyword) {
     const keyword = params.keyword.toLowerCase();
     templates = templates.filter(template => 
@@ -222,14 +216,14 @@ const searchTemplates = (params: TemplateSearchParams): Template[] => {
     );
   }
 
-  // 카테고리 필터
+  // 카테고리 ?�터
   if (params.category) {
     templates = templates.filter(template => 
       template.category.toLowerCase() === params.category!.toLowerCase()
     );
   }
 
-  // 정렬
+  // ?�렬
   const sortBy = params.sortBy || 'updatedAt';
   const sortOrder = params.sortOrder || 'desc';
 
@@ -269,7 +263,7 @@ const searchTemplates = (params: TemplateSearchParams): Template[] => {
   return templates;
 };
 
-// 카테고리 목록 가져오기
+// 카테고리 목록 가?�오�?
 const getTemplateCategories = (): TemplateCategory[] => {
   const templates = getTemplates();
   const categoryMap = new Map<string, number>();
@@ -286,7 +280,7 @@ const getTemplateCategories = (): TemplateCategory[] => {
   }));
 };
 
-// 상용구 통계
+// ?�용�??�계
 const getTemplateStats = () => {
   const templates = getTemplates();
   const totalTemplates = templates.length;
@@ -309,13 +303,13 @@ const getTemplateStats = () => {
   };
 };
 
-// 상용구 백업
+// ?�용�?백업
 const exportTemplates = (): string => {
   const templates = getTemplates();
   return safeJsonStringify(templates) || '[]';
 };
 
-// 상용구 복원
+// ?�용�?복원
 const importTemplates = (jsonData: string): number => {
   if (!isStorageAvailable()) {
     throw new StorageError(ERROR_MESSAGES.STORAGE_NOT_AVAILABLE, 'STORAGE_NOT_AVAILABLE');
@@ -328,7 +322,7 @@ const importTemplates = (jsonData: string): number => {
       throw new StorageError(ERROR_MESSAGES.INVALID_DATA, 'INVALID_DATA');
     }
 
-    // 데이터 검증
+    // ?�이??검�?
     const validTemplates = importedTemplates.filter(template => validateTemplate(template));
     
     const dataSize = safeJsonStringify(validTemplates)?.length || 0;
@@ -338,7 +332,6 @@ const importTemplates = (jsonData: string): number => {
 
     const templatesJson = safeJsonStringify(validTemplates);
     if (templatesJson) {
-      // localStorage.setItem(STORAGE_KEYS.TEMPLATES, templatesJson);
     }
 
     return validTemplates.length;

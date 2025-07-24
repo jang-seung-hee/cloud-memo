@@ -1,4 +1,4 @@
-// 스토리지 키 상수
+// ?�토리�? ???�수
 const STORAGE_KEYS = {
   MEMOS: 'cloud_memo_memos',
   IMAGES: 'cloud_memo_images',
@@ -6,34 +6,30 @@ const STORAGE_KEYS = {
   SETTINGS: 'cloud_memo_settings'
 } as const;
 
-// 에러 메시지 상수
+// ?�러 메시지 ?�수
 const ERROR_MESSAGES = {
-  STORAGE_NOT_AVAILABLE: '로컬스토리지를 사용할 수 없습니다.',
-  STORAGE_FULL: '로컬스토리지 용량이 부족합니다.',
-  INVALID_DATA: '잘못된 데이터 형식입니다.',
-  DATA_TOO_LARGE: '데이터가 너무 큽니다.',
-  IMAGE_TOO_LARGE: '이미지 크기가 너무 큽니다.',
-  QUOTA_EXCEEDED: '저장 공간이 부족합니다.'
+  STORAGE_NOT_AVAILABLE: '로컬?�토리�?�??�용?????�습?�다.',
+  STORAGE_FULL: '로컬?�토리�? ?�량??부족합?�다.',
+  INVALID_DATA: '?�못???�이???�식?�니??',
+  DATA_TOO_LARGE: '?�이?��? ?�무 ?�니??',
+  IMAGE_TOO_LARGE: '?��?지 ?�기가 ?�무 ?�니??',
+  QUOTA_EXCEEDED: '?�??공간??부족합?�다.'
 } as const;
 
-// 설정 상수
+// ?�정 ?�수
 const STORAGE_LIMITS = {
   MAX_IMAGE_SIZE: 5 * 1024 * 1024, // 5MB
-  MAX_TOTAL_STORAGE: 50 * 1024 * 1024, // 50MB
-  MAX_MEMO_LENGTH: 10000, // 10,000자
-  MAX_TEMPLATE_LENGTH: 5000 // 5,000자
+  MAX_MEMO_LENGTH: 10000, // 10,000??
+  MAX_TEMPLATE_LENGTH: 5000 // 5,000??
 } as const;
 
-// 유틸리티 함수들
+// ?�틸리티 ?�수??
 const generateId = (): string => {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 };
 
 const isStorageAvailable = (): boolean => {
   try {
-    const test = '__storage_test__';
-    // localStorage.setItem(test, test);
-    // localStorage.removeItem(test);
     return true;
   } catch {
     return false;
@@ -41,20 +37,16 @@ const isStorageAvailable = (): boolean => {
 };
 
 const getStorageSize = (): number => {
-  let total = 0;
   // for (let i = 0; i < localStorage.length; i++) {
   //   const key = localStorage.key(i);
   //   if (key) {
-  //     total += localStorage.getItem(key)?.length || 0;
   //   }
   // }
-  console.log('로컬스토리지 사용하지 않음, 크기 0 반환');
+  console.log('로컬?�토리�? ?�용?��? ?�음, ?�기 0 반환');
   return 0;
 };
 
-const validateStorageLimit = (dataSize: number): boolean => {
   const currentSize = getStorageSize();
-  return currentSize + dataSize <= STORAGE_LIMITS.MAX_TOTAL_STORAGE;
 };
 
 const safeJsonParse = <T>(json: string, fallback: T): T => {
@@ -73,7 +65,7 @@ const safeJsonStringify = (data: unknown): string | null => {
   }
 };
 
-// 기본 에러 클래스
+// 기본 ?�러 ?�래??
 class StorageError extends Error {
   constructor(message: string, public code: string) {
     super(message);
@@ -88,7 +80,6 @@ export {
   generateId,
   isStorageAvailable,
   getStorageSize,
-  validateStorageLimit,
   safeJsonParse,
   safeJsonStringify,
   StorageError

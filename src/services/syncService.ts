@@ -1,7 +1,5 @@
 import { 
   generateId, 
-  safeJsonParse, 
-  safeJsonStringify
 } from './localStorageService';
 import { 
   createDocument, 
@@ -21,21 +19,18 @@ import {
   NetworkState 
 } from '../types/sync';
 
-// 동기화 큐 저장소 키
-const SYNC_QUEUE_KEY = 'cloud_memo_sync_queue';
-const SYNC_STATE_KEY = 'cloud_memo_sync_state';
-const SYNC_CONFIG_KEY = 'cloud_memo_sync_config';
+// ?�기?????�?�소 ??
 
-// 기본 동기화 설정
+// 기본 ?�기???�정
 const DEFAULT_SYNC_CONFIG: SyncConfig = {
   autoSync: true,
-  syncInterval: 30000, // 30초
+  syncInterval: 30000, // 30�?
   maxRetries: 3,
   conflictResolution: 'remote',
   syncDataTypes: ['memo', 'template', 'image']
 };
 
-// 네트워크 상태 감지
+// ?�트?�크 ?�태 감�?
 const detectNetworkState = (): NetworkState => {
   const isOnline = navigator.onLine;
   
@@ -48,12 +43,12 @@ const detectNetworkState = (): NetworkState => {
   };
 };
 
-// 동기화 큐 관리
+// ?�기????관�?
 class SyncQueue {
   private queue: SyncItem[] = [];
   private isProcessing = false;
 
-  // 큐에 작업 추가
+  // ?�에 ?�업 추�?
   addToQueue(item: Omit<SyncItem, 'id' | 'createdAt' | 'retryCount'>): void {
     const syncItem: SyncItem = {
       ...item,
@@ -66,18 +61,18 @@ class SyncQueue {
     this.saveQueue();
   }
 
-  // 큐에서 작업 가져오기
+  // ?�에???�업 가?�오�?
   getNextItem(): SyncItem | null {
     return this.queue.length > 0 ? this.queue[0] : null;
   }
 
-  // 큐에서 작업 제거
+  // ?�에???�업 ?�거
   removeFromQueue(itemId: string): void {
     this.queue = this.queue.filter(item => item.id !== itemId);
     this.saveQueue();
   }
 
-  // 작업 재시도
+  // ?�업 ?�시??
   retryItem(itemId: string): void {
     const item = this.queue.find(item => item.id === itemId);
     if (item && item.retryCount < item.maxRetries) {
@@ -86,51 +81,48 @@ class SyncQueue {
     }
   }
 
-  // 큐 저장
+  // ???�??
   private saveQueue(): void {
     try {
-      // localStorage.setItem(SYNC_QUEUE_KEY, safeJsonStringify(this.queue) || '[]');
     } catch (error) {
-      console.error('동기화 큐 저장 실패:', error);
+      console.error('?�기?????�???�패:', error);
     }
   }
 
-  // 큐 로드
+  // ??로드
   loadQueue(): void {
     try {
-      // const queueData = localStorage.getItem(SYNC_QUEUE_KEY);
-      // this.queue = safeJsonParse<SyncItem[]>(queueData || '[]', []);
-      console.log('로컬스토리지 사용하지 않음, 빈 큐로 초기화');
+      console.log('로컬?�토리�? ?�용?��? ?�음, �??�로 초기??);
       this.queue = [];
     } catch (error) {
-      console.error('동기화 큐 로드 실패:', error);
+      console.error('?�기????로드 ?�패:', error);
       this.queue = [];
     }
   }
 
-  // 큐 크기
+  // ???�기
   get size(): number {
     return this.queue.length;
   }
 
-  // 큐 비우기
+  // ??비우�?
   clear(): void {
     this.queue = [];
     this.saveQueue();
   }
 
-  // 처리 중 상태 설정
+  // 처리 �??�태 ?�정
   setProcessing(processing: boolean): void {
     this.isProcessing = processing;
   }
 
-  // 처리 중 상태 확인
+  // 처리 �??�태 ?�인
   get isCurrentlyProcessing(): boolean {
     return this.isProcessing;
   }
 }
 
-// 동기화 상태 관리
+// ?�기???�태 관�?
 class SyncStateManager {
   private state: SyncState;
 
@@ -138,37 +130,34 @@ class SyncStateManager {
     this.state = this.loadState();
   }
 
-  // 상태 업데이트
+  // ?�태 ?�데?�트
   updateState(updates: Partial<SyncState>): void {
     this.state = { ...this.state, ...updates };
     this.saveState();
   }
 
-  // 진행률 업데이트
+  // 진행�??�데?�트
   updateProgress(progress: Partial<SyncProgress>): void {
     this.state.progress = { ...this.state.progress, ...progress };
     this.saveState();
   }
 
-  // 상태 가져오기
+  // ?�태 가?�오�?
   getState(): SyncState {
     return { ...this.state };
   }
 
-  // 상태 저장
+  // ?�태 ?�??
   private saveState(): void {
     try {
-      // localStorage.setItem(SYNC_STATE_KEY, safeJsonStringify(this.state) || '{}');
     } catch (error) {
-      console.error('동기화 상태 저장 실패:', error);
+      console.error('?�기???�태 ?�???�패:', error);
     }
   }
 
-  // 상태 로드
+  // ?�태 로드
   private loadState(): SyncState {
     try {
-      // const stateData = localStorage.getItem(SYNC_STATE_KEY);
-      // const savedState = safeJsonParse<SyncState>(stateData || '{}', {
       //   status: SyncStatus.IDLE,
       //   progress: {
       //     currentTask: '',
@@ -194,7 +183,7 @@ class SyncStateManager {
       //   error: null,
       //   isOnline: navigator.onLine
       // };
-      console.log('로컬스토리지 사용하지 않음, 기본 상태로 초기화');
+      console.log('로컬?�토리�? ?�용?��? ?�음, 기본 ?�태�?초기??);
       return {
         status: SyncStatus.IDLE,
         progress: {
@@ -208,7 +197,7 @@ class SyncStateManager {
         isOnline: navigator.onLine
       };
     } catch (error) {
-      console.error('동기화 상태 로드 실패:', error);
+      console.error('?�기???�태 로드 ?�패:', error);
       return {
         status: SyncStatus.IDLE,
         progress: {
@@ -225,7 +214,7 @@ class SyncStateManager {
   }
 }
 
-// 동기화 설정 관리
+// ?�기???�정 관�?
 class SyncConfigManager {
   private config: SyncConfig;
 
@@ -233,43 +222,40 @@ class SyncConfigManager {
     this.config = this.loadConfig();
   }
 
-  // 설정 가져오기
+  // ?�정 가?�오�?
   getConfig(): SyncConfig {
     return { ...this.config };
   }
 
-  // 설정 업데이트
+  // ?�정 ?�데?�트
   updateConfig(updates: Partial<SyncConfig>): void {
     this.config = { ...this.config, ...updates };
     this.saveConfig();
   }
 
-  // 설정 저장
+  // ?�정 ?�??
   private saveConfig(): void {
     try {
-      // localStorage.setItem(SYNC_CONFIG_KEY, safeJsonStringify(this.config) || '{}');
     } catch (error) {
-      console.error('동기화 설정 저장 실패:', error);
+      console.error('?�기???�정 ?�???�패:', error);
     }
   }
 
-  // 설정 로드
+  // ?�정 로드
   private loadConfig(): SyncConfig {
     try {
-      // const configData = localStorage.getItem(SYNC_CONFIG_KEY);
-      // const savedConfig = safeJsonParse<SyncConfig>(configData || '{}', DEFAULT_SYNC_CONFIG);
       
       // return { ...DEFAULT_SYNC_CONFIG, ...savedConfig };
-      console.log('로컬스토리지 사용하지 않음, 기본 설정으로 초기화');
+      console.log('로컬?�토리�? ?�용?��? ?�음, 기본 ?�정?�로 초기??);
       return { ...DEFAULT_SYNC_CONFIG };
     } catch (error) {
-      console.error('동기화 설정 로드 실패:', error);
+      console.error('?�기???�정 로드 ?�패:', error);
       return { ...DEFAULT_SYNC_CONFIG };
     }
   }
 }
 
-// 메인 동기화 서비스
+// 메인 ?�기???�비??
 class SyncService {
   private queue: SyncQueue;
   private stateManager: SyncStateManager;
@@ -285,7 +271,7 @@ class SyncService {
     this.setupNetworkListeners();
   }
 
-  // 네트워크 리스너 설정
+  // ?�트?�크 리스???�정
   private setupNetworkListeners(): void {
     window.addEventListener('online', () => {
       this.stateManager.updateState({ isOnline: true });
@@ -300,7 +286,7 @@ class SyncService {
     });
   }
 
-  // 동기화 작업 추가
+  // ?�기???�업 추�?
   addSyncOperation(
     operation: SyncOperation,
     dataType: 'memo' | 'template' | 'image',
@@ -320,7 +306,7 @@ class SyncService {
     }
   }
 
-  // 큐 처리
+  // ??처리
   async processQueue(): Promise<void> {
     if (this.queue.isCurrentlyProcessing || this.queue.size === 0) {
       return;
@@ -365,13 +351,13 @@ class SyncService {
           percentage: Math.round((completedTasks / totalTasks) * 100)
         });
       } catch (error) {
-        console.error('동기화 작업 실패:', error);
+        console.error('?�기???�업 ?�패:', error);
         
         if (item.retryCount >= item.maxRetries) {
           this.queue.removeFromQueue(item.id);
           this.stateManager.updateState({ 
             status: SyncStatus.ERROR,
-            error: `동기화 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}`
+            error: `?�기???�패: ${error instanceof Error ? error.message : '?????�는 ?�류'}`
           });
         } else {
           this.queue.retryItem(item.id);
@@ -391,7 +377,7 @@ class SyncService {
     }
   }
 
-  // 개별 동기화 작업 처리
+  // 개별 ?�기???�업 처리
   private async processSyncItem(item: SyncItem): Promise<void> {
     switch (item.operation) {
       case SyncOperation.CREATE:
@@ -412,25 +398,25 @@ class SyncService {
     }
   }
 
-  // 생성 작업 처리
+  // ?�성 ?�업 처리
   private async handleCreate(item: SyncItem): Promise<void> {
     const collectionName = this.getCollectionName(item.dataType);
     await createDocument(collectionName, item.data as any);
   }
 
-  // 수정 작업 처리
+  // ?�정 ?�업 처리
   private async handleUpdate(item: SyncItem): Promise<void> {
     const collectionName = this.getCollectionName(item.dataType);
     await updateDocument(collectionName, item.dataId, item.data as any);
   }
 
-  // 삭제 작업 처리
+  // ??�� ?�업 처리
   private async handleDelete(item: SyncItem): Promise<void> {
     const collectionName = this.getCollectionName(item.dataType);
     await deleteDocument(collectionName, item.dataId);
   }
 
-  // 업로드 작업 처리
+  // ?�로???�업 처리
   private async handleUpload(item: SyncItem): Promise<void> {
     if (item.data instanceof File) {
       const path = `${item.dataType}s`;
@@ -438,13 +424,13 @@ class SyncService {
     }
   }
 
-  // 다운로드 작업 처리
+  // ?�운로드 ?�업 처리
   private async handleDownload(item: SyncItem): Promise<void> {
-    // 다운로드 로직은 추후 구현
-    console.log('다운로드 작업:', item);
+    // ?�운로드 로직?� 추후 구현
+    console.log('?�운로드 ?�업:', item);
   }
 
-  // 컬렉션 이름 가져오기
+  // 컬렉???�름 가?�오�?
   private getCollectionName(dataType: string): string {
     switch (dataType) {
       case 'memo':
@@ -454,11 +440,11 @@ class SyncService {
       case 'image':
         return COLLECTIONS.IMAGES;
       default:
-        throw new Error(`지원하지 않는 데이터 타입: ${dataType}`);
+        throw new Error(`지?�하지 ?�는 ?�이???�?? ${dataType}`);
     }
   }
 
-  // 충돌 해결
+  // 충돌 ?�결
   private resolveConflict(
     local: unknown,
     remote: unknown,
@@ -486,27 +472,27 @@ class SyncService {
     };
   }
 
-  // 상태 가져오기
+  // ?�태 가?�오�?
   getState(): SyncState {
     return this.stateManager.getState();
   }
 
-  // 설정 가져오기
+  // ?�정 가?�오�?
   getConfig(): SyncConfig {
     return this.configManager.getConfig();
   }
 
-  // 설정 업데이트
+  // ?�정 ?�데?�트
   updateConfig(updates: Partial<SyncConfig>): void {
     this.configManager.updateConfig(updates);
   }
 
-  // 수동 동기화 시작
+  // ?�동 ?�기???�작
   async startManualSync(): Promise<void> {
     await this.processQueue();
   }
 
-  // 자동 동기화 시작
+  // ?�동 ?�기???�작
   startAutoSync(): void {
     if (this.syncInterval) {
       clearInterval(this.syncInterval);
@@ -520,7 +506,7 @@ class SyncService {
     }
   }
 
-  // 자동 동기화 중지
+  // ?�동 ?�기??중�?
   stopAutoSync(): void {
     if (this.syncInterval) {
       clearInterval(this.syncInterval);
@@ -528,18 +514,18 @@ class SyncService {
     }
   }
 
-  // 큐 비우기
+  // ??비우�?
   clearQueue(): void {
     this.queue.clear();
   }
 
-  // 네트워크 상태 가져오기
+  // ?�트?�크 ?�태 가?�오�?
   getNetworkState(): NetworkState {
     return detectNetworkState();
   }
 }
 
-// 싱글톤 인스턴스 생성
+// ?��????�스?�스 ?�성
 const syncService = new SyncService();
 
 export default syncService;

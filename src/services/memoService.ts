@@ -6,7 +6,6 @@ import {
   MemoSearchParams 
 } from '../types/memo';
 import { 
-  STORAGE_KEYS, 
   ERROR_MESSAGES, 
   STORAGE_LIMITS,
   generateId, 
@@ -27,14 +26,13 @@ import {
 } from './firebaseService';
 
 
-// 재시도 설정
+// ?�시???�정
 const RETRY_CONFIG = {
   maxRetries: 3,
-  retryDelay: 1000, // 1초
-  backoffMultiplier: 2
+  retryDelay: 1000, // 1�?  backoffMultiplier: 2
 } as const;
 
-// 재시도 유틸리티 함수
+// ?�시???�틸리티 ?�수
 const retryWithBackoff = async <T>(
   operation: () => Promise<T>,
   maxRetries: number = RETRY_CONFIG.maxRetries,
@@ -52,26 +50,24 @@ const retryWithBackoff = async <T>(
         throw lastError;
       }
       
-      // 네트워크 오류가 아닌 경우 재시도하지 않음
+      // ?�트?�크 ?�류가 ?�닌 경우 ?�시?�하지 ?�음
       if (lastError.message.includes('permission') || 
           lastError.message.includes('unauthenticated') ||
           lastError.message.includes('invalid')) {
         throw lastError;
       }
       
-      console.warn(`작업 실패 (시도 ${attempt + 1}/${maxRetries + 1}):`, lastError.message);
+      console.warn(`?�업 ?�패 (?�도 ${attempt + 1}/${maxRetries + 1}):`, lastError.message);
       
-      // 지수 백오프로 대기
-      await new Promise(resolve => setTimeout(resolve, delay));
-      delay *= RETRY_CONFIG.backoffMultiplier;
+      // 지??백오?�로 ?��?      await new Promise(resolve => setTimeout(resolve, delay));
+      delay = delay * RETRY_CONFIG.backoffMultiplier;
     }
   }
   
-  throw lastError!;
+  throw new Error(lastError!.message);
 };
 
-// 메모 데이터 검증
-const validateMemo = (memo: Partial<Memo>): boolean => {
+// 메모 ?�이??검�?const validateMemo = (memo: Partial<Memo>): boolean => {
   if (!memo.content || memo.content.trim().length === 0) {
     return false;
   }
@@ -81,57 +77,56 @@ const validateMemo = (memo: Partial<Memo>): boolean => {
   return true;
 };
 
-// 내용에서 제목 추출 (첫 줄 또는 첫 50자)
+// ?�용?�서 ?�목 추출 (�?�??�는 �?50??
 const extractTitleFromContent = (content: string): string => {
   const trimmedContent = content.trim();
   if (!trimmedContent) return '';
   
-  // 첫 줄 추출
+  // �?�?추출
   const firstLine = trimmedContent.split('\n')[0].trim();
   if (firstLine.length <= 50) {
     return firstLine;
   }
   
-  // 첫 줄이 50자를 초과하면 50자로 자르고 ... 추가
+  // �?줄이 50?��? 초과?�면 50?�로 ?�르�?... 추�?
   return firstLine.substring(0, 50) + '...';
 };
 
-// 메모 목록 가져오기
-const getMemos = async (): Promise<Memo[]> => {
+// 메모 목록 가?�오�?const getMemos = async (): Promise<Memo[]> => {
   return retryWithBackoff(async () => {
     try {
       let memos: Memo[] = [];
 
-      // Firebase에서 데이터 가져오기 (1차 저장소)
+      // Firebase?�서 ?�이??가?�오�?(1�??�?�소)
       if (isFirebaseAvailable() && getCurrentUserId()) {
         try {
-          console.log('Firebase에서 메모 데이터 가져오는 중...');
+          console.log('Firebase?�서 메모 ?�이??가?�오??�?..');
           const firebaseMemos = await getDocuments<Memo>(COLLECTIONS.MEMOS, {});
           
-          console.log('Firebase에서 가져온 메모:', firebaseMemos);
+          console.log('Firebase?�서 가?�온 메모:', firebaseMemos);
           
           if (firebaseMemos.length > 0) {
             memos = firebaseMemos;
-            console.log('Firebase에서 메모 데이터 로드 완료');
+            console.log('Firebase?�서 메모 ?�이??로드 ?�료');
           } else {
-            console.log('Firebase에 메모가 없음');
+            console.log('Firebase??메모가 ?�음');
           }
         } catch (firebaseError) {
-          console.error('Firebase에서 메모 가져오기 실패:', firebaseError);
-          throw new StorageError('Firebase 연결에 실패했습니다.', 'FIREBASE_ERROR');
+          console.error('Firebase?�서 메모 가?�오�??�패:', firebaseError);
+          throw new StorageError('Firebase ?�결???�패?�습?�다.', 'FIREBASE_ERROR');
         }
       } else {
-        console.log('Firebase 사용 불가 또는 사용자 미인증');
-        throw new StorageError('Firebase 연결이 필요합니다.', 'FIREBASE_UNAVAILABLE');
+        console.log('Firebase ?�용 불�? ?�는 ?�용??미인�?);
+        throw new StorageError('Firebase ?�결???�요?�니??', 'FIREBASE_UNAVAILABLE');
       }
 
-      // 기존 메모에 카테고리 필드가 없는 경우 기본값 추가
+      // 기존 메모??카테고리 ?�드가 ?�는 경우 기본�?추�?
       const processedMemos = memos.map(memo => ({
         ...memo,
-        category: memo.category || '임시' // 기본값으로 '임시' 설정
+        category: memo.category || '?�시' // 기본값으�?'?�시' ?�정
       }));
 
-      // 안전한 날짜 변환 함수
+      // ?�전???�짜 변???�수
       const safeDateConversion = (date: any): Date => {
         try {
           if (date instanceof Date) {
@@ -139,38 +134,38 @@ const getMemos = async (): Promise<Memo[]> => {
           } else if (typeof date === 'string') {
             return new Date(date);
           } else if (date && typeof date === 'object' && date.toDate) {
-            // Firebase Timestamp 객체인 경우
+            // Firebase Timestamp 객체??경우
             return date.toDate();
           } else if (date && typeof date === 'object' && date.seconds) {
-            // Firebase Timestamp 객체인 경우 (seconds, nanoseconds)
+            // Firebase Timestamp 객체??경우 (seconds, nanoseconds)
             return new Date(date.seconds * 1000);
           } else {
-            // 기타 경우 문자열로 변환 후 Date 객체 생성
+            // 기�? 경우 문자?�로 변????Date 객체 ?�성
             return new Date(String(date));
           }
         } catch (error) {
-          console.error('날짜 변환 오류:', error, date);
-          return new Date(); // 기본값으로 현재 시간 반환
+          console.error('?�짜 변???�류:', error, date);
+          return new Date(); // 기본값으�??�재 ?�간 반환
         }
       };
 
-      // 최근 작성한 메모가 위쪽으로 오도록 정렬 (updatedAt 기준 내림차순)
+      // 최근 ?�성??메모가 ?�쪽?�로 ?�도�??�렬 (updatedAt 기�? ?�림차순)
       const sortedMemos = processedMemos.sort((a, b) => {
         const dateA = safeDateConversion(a.updatedAt || a.createdAt);
         const dateB = safeDateConversion(b.updatedAt || b.createdAt);
         return dateB.getTime() - dateA.getTime();
       });
 
-      console.log('최종 메모 목록:', sortedMemos.length, '개');
+      console.log('최종 메모 목록:', sortedMemos.length, '�?);
       return sortedMemos;
     } catch (error) {
-      console.error('메모 목록 가져오기 실패:', error);
-      throw error; // 에러를 상위로 전파
+      console.error('메모 목록 가?�오�??�패:', error);
+      throw error; // ?�러�??�위�??�파
     }
   });
 };
 
-// 메모 생성
+// 메모 ?�성
 const createMemo = async (request: CreateMemoRequest): Promise<Memo> => {
   if (!validateMemo(request)) {
     throw new StorageError(ERROR_MESSAGES.INVALID_DATA, 'INVALID_DATA');
@@ -180,19 +175,19 @@ const createMemo = async (request: CreateMemoRequest): Promise<Memo> => {
   const memoData: Omit<Memo, 'id'> = {
     title,
     content: request.content.trim(),
-    category: request.category || '임시',
+    category: request.category || '?�시',
     images: request.images || [],
     createdAt: new Date(),
     updatedAt: new Date().toISOString()
   };
 
   try {
-    // Firebase에 저장 (1차 저장소)
+    // Firebase???�??(1�??�?�소)
     if (isFirebaseAvailable() && getCurrentUserId()) {
       const savedMemo = await createDocument(COLLECTIONS.MEMOS, memoData);
-      console.log('Firebase에 메모 저장 성공:', savedMemo.id);
+      console.log('Firebase??메모 ?�???�공:', savedMemo.id);
       
-      // Firebase에서 생성된 ID를 포함한 완전한 메모 객체 반환
+      // Firebase?�서 ?�성??ID�??�함???�전??메모 객체 반환
       const newMemo: Memo = {
         ...memoData,
         id: savedMemo.id || generateId()
@@ -200,12 +195,12 @@ const createMemo = async (request: CreateMemoRequest): Promise<Memo> => {
       
       return newMemo;
     } else {
-      console.log('Firebase 사용 불가 또는 사용자 미인증');
-      throw new StorageError('Firebase 연결이 필요합니다.', 'FIREBASE_UNAVAILABLE');
+      console.log('Firebase ?�용 불�? ?�는 ?�용??미인�?);
+      throw new StorageError('Firebase ?�결???�요?�니??', 'FIREBASE_UNAVAILABLE');
     }
   } catch (error) {
-    console.error('메모 생성 실패:', error);
-    throw error; // 에러를 상위로 전파
+    console.error('메모 ?�성 ?�패:', error);
+    throw error; // ?�러�??�위�??�파
   }
 };
 
@@ -214,16 +209,16 @@ const getMemo = async (id: string): Promise<Memo | null> => {
   const memos = await getMemos();
   const memo = memos.find(memo => memo.id === id);
   if (memo) {
-    // 카테고리가 없는 경우 기본값 추가
+    // 카테고리가 ?�는 경우 기본�?추�?
     return {
       ...memo,
-      category: memo.category || '임시'
+      category: memo.category || '?�시'
     };
   }
   return null;
 };
 
-// 메모 수정
+// 메모 ?�정
 const updateMemo = async (id: string, request: UpdateMemoRequest): Promise<Memo> => {
   if (!isStorageAvailable()) {
     throw new StorageError(ERROR_MESSAGES.STORAGE_NOT_AVAILABLE, 'STORAGE_NOT_AVAILABLE');
@@ -233,23 +228,22 @@ const updateMemo = async (id: string, request: UpdateMemoRequest): Promise<Memo>
   const memoIndex = memos.findIndex(memo => memo.id === id);
 
   if (memoIndex === -1) {
-    throw new StorageError('메모를 찾을 수 없습니다.', 'MEMO_NOT_FOUND');
+    throw new StorageError('메모�?찾을 ???�습?�다.', 'MEMO_NOT_FOUND');
   }
 
   const currentMemo = memos[memoIndex];
   let newTitle = currentMemo.title;
   let newContent = currentMemo.content;
 
-  // 제목 업데이트
+  // ?�목 ?�데?�트
   if (request.title !== undefined) {
     newTitle = request.title.trim() || extractTitleFromContent(newContent);
   }
 
-  // 내용 업데이트
+  // ?�용 ?�데?�트
   if (request.content !== undefined) {
     newContent = request.content.trim();
-    // 제목이 없거나 내용이 변경된 경우 제목 재생성
-    if (!newTitle || request.title === undefined) {
+    // ?�목???�거???�용??변경된 경우 ?�목 ?�생??    if (!newTitle || request.title === undefined) {
       newTitle = extractTitleFromContent(newContent);
     }
   }
@@ -268,52 +262,47 @@ const updateMemo = async (id: string, request: UpdateMemoRequest): Promise<Memo>
   }
 
   try {
-    // 1. Firebase에 먼저 업데이트 (온라인 우선)
+    // 1. Firebase??먼�? ?�데?�트 (?�라???�선)
     if (isFirebaseAvailable() && getCurrentUserId()) {
       await updateDocument(COLLECTIONS.MEMOS, updatedMemo.id, updatedMemo);
-      console.log('Firebase에 메모 업데이트 성공:', updatedMemo.id);
+      console.log('Firebase??메모 ?�데?�트 ?�공:', updatedMemo.id);
       
-      // 2. Firebase에서 최신 데이터를 다시 가져와서 로컬 캐시 업데이트
+      // 2. Firebase?�서 최신 ?�이?��? ?�시 가?��???로컬 캐시 ?�데?�트
       try {
         const firebaseMemos = await getDocuments<Memo>(COLLECTIONS.MEMOS, {});
         
         if (firebaseMemos.length > 0) {
           const memosJson = safeJsonStringify(firebaseMemos);
           if (memosJson) {
-            // localStorage.setItem(STORAGE_KEYS.MEMOS, memosJson);
-            console.log('로컬 캐시 업데이트 완료 (Firebase 데이터 기준)');
+            console.log('로컬 캐시 ?�데?�트 ?�료 (Firebase ?�이??기�?)');
           }
         }
       } catch (cacheError) {
-        console.warn('로컬 캐시 업데이트 실패, 로컬에만 저장:', cacheError);
-        // 로컬에만 저장 (오프라인 모드)
+        console.warn('로컬 캐시 ?�데?�트 ?�패, 로컬?�만 ?�??', cacheError);
+        // 로컬?�만 ?�??(?�프?�인 모드)
         memos[memoIndex] = updatedMemo;
         const memosJson = safeJsonStringify(memos);
         if (memosJson) {
-          // localStorage.setItem(STORAGE_KEYS.MEMOS, memosJson);
         }
       }
     } else {
-      // 3. Firebase 사용 불가능한 경우 로컬에만 저장
-      console.log('Firebase 사용 불가능, 로컬에만 저장');
+      // 3. Firebase ?�용 불�??�한 경우 로컬?�만 ?�??      console.log('Firebase ?�용 불�??? 로컬?�만 ?�??);
       memos[memoIndex] = updatedMemo;
       const memosJson = safeJsonStringify(memos);
       if (memosJson) {
-        // localStorage.setItem(STORAGE_KEYS.MEMOS, memosJson);
       }
     }
 
     return updatedMemo;
   } catch (error) {
-    console.error('메모 수정 실패:', error);
+    console.error('메모 ?�정 ?�패:', error);
     
-    // 3. Firebase 실패 시 로컬에만 저장 (오프라인 모드)
+    // 3. Firebase ?�패 ??로컬?�만 ?�??(?�프?�인 모드)
     if (error instanceof StorageError && error.code === 'NETWORK_ERROR') {
-      console.warn('네트워크 오류, 로컬에만 저장:', error);
+      console.warn('?�트?�크 ?�류, 로컬?�만 ?�??', error);
       memos[memoIndex] = updatedMemo;
       const memosJson = safeJsonStringify(memos);
       if (memosJson) {
-        // localStorage.setItem(STORAGE_KEYS.MEMOS, memosJson);
       }
       return updatedMemo;
     }
@@ -322,7 +311,7 @@ const updateMemo = async (id: string, request: UpdateMemoRequest): Promise<Memo>
   }
 };
 
-// 메모 삭제
+// 메모 ??��
 const deleteMemo = async (id: string): Promise<boolean> => {
   if (!isStorageAvailable()) {
     throw new StorageError(ERROR_MESSAGES.STORAGE_NOT_AVAILABLE, 'STORAGE_NOT_AVAILABLE');
@@ -336,50 +325,46 @@ const deleteMemo = async (id: string): Promise<boolean> => {
   }
 
   try {
-    // 1. Firebase에서 먼저 삭제 (온라인 우선)
+    // 1. Firebase?�서 먼�? ??�� (?�라???�선)
     if (isFirebaseAvailable() && getCurrentUserId()) {
       await deleteDocument(COLLECTIONS.MEMOS, id);
-      console.log('Firebase에서 메모 삭제 성공:', id);
+      console.log('Firebase?�서 메모 ??�� ?�공:', id);
       
-      // 2. Firebase에서 최신 데이터를 다시 가져와서 로컬 캐시 업데이트
+      // 2. Firebase?�서 최신 ?�이?��? ?�시 가?��???로컬 캐시 ?�데?�트
       try {
         const firebaseMemos = await getDocuments<Memo>(COLLECTIONS.MEMOS, {});
         
         const memosJson = safeJsonStringify(firebaseMemos);
         if (memosJson) {
-          // localStorage.setItem(STORAGE_KEYS.MEMOS, memosJson);
-          console.log('로컬 캐시 업데이트 완료 (Firebase 데이터 기준)');
+          console.log('로컬 캐시 ?�데?�트 ?�료 (Firebase ?�이??기�?)');
         }
       } catch (cacheError) {
-        console.warn('로컬 캐시 업데이트 실패, 로컬에서만 삭제:', cacheError);
-        // 로컬에서만 삭제 (오프라인 모드)
+        console.warn('로컬 캐시 ?�데?�트 ?�패, 로컬?�서�???��:', cacheError);
+        // 로컬?�서�???�� (?�프?�인 모드)
         memos.splice(memoIndex, 1);
         const memosJson = safeJsonStringify(memos);
         if (memosJson) {
-          // localStorage.setItem(STORAGE_KEYS.MEMOS, memosJson);
         }
       }
     } else {
-      // 3. Firebase 사용 불가능한 경우 로컬에서만 삭제
-      console.log('Firebase 사용 불가능, 로컬에서만 삭제');
+      // 3. Firebase ?�용 불�??�한 경우 로컬?�서�???��
+      console.log('Firebase ?�용 불�??? 로컬?�서�???��');
       memos.splice(memoIndex, 1);
       const memosJson = safeJsonStringify(memos);
       if (memosJson) {
-        // localStorage.setItem(STORAGE_KEYS.MEMOS, memosJson);
       }
     }
 
     return true;
   } catch (error) {
-    console.error('메모 삭제 실패:', error);
+    console.error('메모 ??�� ?�패:', error);
     
-    // 3. Firebase 실패 시 로컬에서만 삭제 (오프라인 모드)
+    // 3. Firebase ?�패 ??로컬?�서�???�� (?�프?�인 모드)
     if (error instanceof StorageError && error.code === 'NETWORK_ERROR') {
-      console.warn('네트워크 오류, 로컬에서만 삭제:', error);
+      console.warn('?�트?�크 ?�류, 로컬?�서�???��:', error);
       memos.splice(memoIndex, 1);
       const memosJson = safeJsonStringify(memos);
       if (memosJson) {
-        // localStorage.setItem(STORAGE_KEYS.MEMOS, memosJson);
       }
       return true;
     }
@@ -388,12 +373,10 @@ const deleteMemo = async (id: string): Promise<boolean> => {
   }
 };
 
-// 메모 검색
-const searchMemos = async (params: MemoSearchParams): Promise<MemoListResponse> => {
+// 메모 검??const searchMemos = async (params: MemoSearchParams): Promise<MemoListResponse> => {
   let memos = await getMemos();
 
-  // 키워드 검색
-  if (params.keyword) {
+  // ?�워??검??  if (params.keyword) {
     const keyword = params.keyword.toLowerCase();
     memos = memos.filter(memo => 
       (memo.title?.toLowerCase().includes(keyword) || false) || 
@@ -401,7 +384,7 @@ const searchMemos = async (params: MemoSearchParams): Promise<MemoListResponse> 
     );
   }
 
-  // 정렬
+  // ?�렬
   const sortBy = params.sortBy || 'updatedAt';
   const sortOrder = params.sortOrder || 'desc';
 
@@ -432,8 +415,7 @@ const searchMemos = async (params: MemoSearchParams): Promise<MemoListResponse> 
     }
   });
 
-  // 페이지네이션
-  const page = params.page || 1;
+  // ?�이지?�이??  const page = params.page || 1;
   const pageSize = params.pageSize || 20;
   const startIndex = (page - 1) * pageSize;
   const endIndex = startIndex + pageSize;
@@ -445,7 +427,7 @@ const searchMemos = async (params: MemoSearchParams): Promise<MemoListResponse> 
   };
 };
 
-// 메모 통계
+// 메모 ?�계
 const getMemoStats = async () => {
   const memos = await getMemos();
   const totalMemos = memos.length;
@@ -484,8 +466,7 @@ const importMemos = (jsonData: string): number => {
       throw new StorageError(ERROR_MESSAGES.INVALID_DATA, 'INVALID_DATA');
     }
 
-    // 데이터 검증
-    const validMemos = importedMemos.filter(memo => validateMemo(memo));
+    // ?�이??검�?    const validMemos = importedMemos.filter(memo => validateMemo(memo));
     
     const dataSize = safeJsonStringify(validMemos)?.length || 0;
     if (!validateStorageLimit(dataSize)) {
@@ -494,7 +475,6 @@ const importMemos = (jsonData: string): number => {
 
     const memosJson = safeJsonStringify(validMemos);
     if (memosJson) {
-      // localStorage.setItem(STORAGE_KEYS.MEMOS, memosJson);
     }
 
     return validMemos.length;
@@ -518,3 +498,4 @@ export {
   importMemos,
   validateMemo
 }; 
+
