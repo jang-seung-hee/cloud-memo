@@ -350,6 +350,7 @@ const MemoForm: React.FC<MemoFormProps> = ({
         // 수정 모드
         await updateMemo(memo.id, {
           content: content.trim(),
+          category: category,
           images: images
         });
       } else {
