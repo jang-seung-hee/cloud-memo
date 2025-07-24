@@ -138,34 +138,38 @@ const createMemo = async (request: CreateMemoRequest): Promise<Memo> => {
     updatedAt: new Date().toISOString()
   };
 
-  const memos = await getMemos(); // 현재 메모 목록을 가져와서 크기 계산
-  const dataSize = safeJsonStringify([...memos, newMemo])?.length || 0;
-
-  if (!validateStorageLimit(dataSize)) {
-    throw new StorageError(ERROR_MESSAGES.STORAGE_FULL, 'STORAGE_FULL');
-  }
-
   try {
-    memos.push(newMemo);
+    // 1. Firebase에 먼저 저장 (온라인 우선)
+    if (isFirebaseAvailable() && getCurrentUserId()) {
+      await createDocument(COLLECTIONS.MEMOS, newMemo);
+      console.log('Firebase에 메모 저장 성공:', newMemo.id);
+    }
+
+    // 2. 성공하면 로컬에 캐시
+    const memos = await getMemos();
+    memos.unshift(newMemo);
     const memosJson = safeJsonStringify(memos);
     if (memosJson) {
       localStorage.setItem(STORAGE_KEYS.MEMOS, memosJson);
     }
 
-    // Firebase 동기화 (인증된 사용자인 경우)
-    if (isFirebaseAvailable() && getCurrentUserId()) {
-      try {
-        // Firebase에 직접 저장
-        await createDocument(COLLECTIONS.MEMOS, newMemo);
-      } catch (syncError) {
-        console.warn('Firebase 동기화 실패 (메모 생성):', syncError);
-        // 동기화 실패해도 로컬 저장은 성공으로 처리
-      }
-    }
-
     return newMemo;
   } catch (error) {
-    throw new StorageError(ERROR_MESSAGES.QUOTA_EXCEEDED, 'QUOTA_EXCEEDED');
+    console.error('메모 생성 실패:', error);
+    
+    // 3. Firebase 실패 시 로컬에만 저장 (오프라인 모드)
+    if (error instanceof StorageError && error.code === 'NETWORK_ERROR') {
+      console.warn('네트워크 오류, 로컬에만 저장:', error);
+      const memos = await getMemos();
+      memos.unshift(newMemo);
+      const memosJson = safeJsonStringify(memos);
+      if (memosJson) {
+        localStorage.setItem(STORAGE_KEYS.MEMOS, memosJson);
+      }
+      return newMemo;
+    }
+    
+    throw error;
   }
 };
 
@@ -189,7 +193,7 @@ const updateMemo = async (id: string, request: UpdateMemoRequest): Promise<Memo>
     throw new StorageError(ERROR_MESSAGES.STORAGE_NOT_AVAILABLE, 'STORAGE_NOT_AVAILABLE');
   }
 
-  const memos = await getMemos(); // 현재 메모 목록을 가져와서 수정
+  const memos = await getMemos();
   const memoIndex = memos.findIndex(memo => memo.id === id);
 
   if (memoIndex === -1) {
@@ -227,33 +231,36 @@ const updateMemo = async (id: string, request: UpdateMemoRequest): Promise<Memo>
     throw new StorageError(ERROR_MESSAGES.INVALID_DATA, 'INVALID_DATA');
   }
 
-  const dataSize = safeJsonStringify([...memos.slice(0, memoIndex), updatedMemo, ...memos.slice(memoIndex + 1)])?.length || 0;
-
-  if (!validateStorageLimit(dataSize)) {
-    throw new StorageError(ERROR_MESSAGES.STORAGE_FULL, 'STORAGE_FULL');
-  }
-
   try {
+    // 1. Firebase에 먼저 업데이트 (온라인 우선)
+    if (isFirebaseAvailable() && getCurrentUserId()) {
+      await updateDocument(COLLECTIONS.MEMOS, updatedMemo.id, updatedMemo);
+      console.log('Firebase에 메모 업데이트 성공:', updatedMemo.id);
+    }
+
+    // 2. 성공하면 로컬에 캐시
     memos[memoIndex] = updatedMemo;
     const memosJson = safeJsonStringify(memos);
     if (memosJson) {
       localStorage.setItem(STORAGE_KEYS.MEMOS, memosJson);
     }
 
-    // Firebase 동기화 (인증된 사용자인 경우)
-    if (isFirebaseAvailable() && getCurrentUserId()) {
-      try {
-        // Firebase에 직접 업데이트
-        await updateDocument(COLLECTIONS.MEMOS, updatedMemo.id, updatedMemo);
-      } catch (syncError) {
-        console.warn('Firebase 동기화 실패 (메모 수정):', syncError);
-        // 동기화 실패해도 로컬 저장은 성공으로 처리
-      }
-    }
-
     return updatedMemo;
   } catch (error) {
-    throw new StorageError(ERROR_MESSAGES.QUOTA_EXCEEDED, 'QUOTA_EXCEEDED');
+    console.error('메모 수정 실패:', error);
+    
+    // 3. Firebase 실패 시 로컬에만 저장 (오프라인 모드)
+    if (error instanceof StorageError && error.code === 'NETWORK_ERROR') {
+      console.warn('네트워크 오류, 로컬에만 저장:', error);
+      memos[memoIndex] = updatedMemo;
+      const memosJson = safeJsonStringify(memos);
+      if (memosJson) {
+        localStorage.setItem(STORAGE_KEYS.MEMOS, memosJson);
+      }
+      return updatedMemo;
+    }
+    
+    throw error;
   }
 };
 
@@ -263,7 +270,7 @@ const deleteMemo = async (id: string): Promise<boolean> => {
     throw new StorageError(ERROR_MESSAGES.STORAGE_NOT_AVAILABLE, 'STORAGE_NOT_AVAILABLE');
   }
 
-  const memos = await getMemos(); // 현재 메모 목록을 가져와서 삭제
+  const memos = await getMemos();
   const memoIndex = memos.findIndex(memo => memo.id === id);
 
   if (memoIndex === -1) {
@@ -271,26 +278,35 @@ const deleteMemo = async (id: string): Promise<boolean> => {
   }
 
   try {
+    // 1. Firebase에서 먼저 삭제 (온라인 우선)
+    if (isFirebaseAvailable() && getCurrentUserId()) {
+      await deleteDocument(COLLECTIONS.MEMOS, id);
+      console.log('Firebase에서 메모 삭제 성공:', id);
+    }
+
+    // 2. 성공하면 로컬에서도 삭제
     memos.splice(memoIndex, 1);
     const memosJson = safeJsonStringify(memos);
     if (memosJson) {
       localStorage.setItem(STORAGE_KEYS.MEMOS, memosJson);
     }
 
-    // Firebase 동기화 (인증된 사용자인 경우)
-    if (isFirebaseAvailable() && getCurrentUserId()) {
-      try {
-        // Firebase에서 직접 삭제
-        await deleteDocument(COLLECTIONS.MEMOS, id);
-      } catch (syncError) {
-        console.warn('Firebase 동기화 실패 (메모 삭제):', syncError);
-        // 동기화 실패해도 로컬 삭제는 성공으로 처리
-      }
-    }
-
     return true;
   } catch (error) {
-    throw new StorageError(ERROR_MESSAGES.QUOTA_EXCEEDED, 'QUOTA_EXCEEDED');
+    console.error('메모 삭제 실패:', error);
+    
+    // 3. Firebase 실패 시 로컬에서만 삭제 (오프라인 모드)
+    if (error instanceof StorageError && error.code === 'NETWORK_ERROR') {
+      console.warn('네트워크 오류, 로컬에서만 삭제:', error);
+      memos.splice(memoIndex, 1);
+      const memosJson = safeJsonStringify(memos);
+      if (memosJson) {
+        localStorage.setItem(STORAGE_KEYS.MEMOS, memosJson);
+      }
+      return true;
+    }
+    
+    throw error;
   }
 };
 
