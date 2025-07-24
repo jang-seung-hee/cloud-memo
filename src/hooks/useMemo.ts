@@ -43,7 +43,7 @@ export function useMemo(options: UseMemoOptions = {}): UseMemoReturn {
     try {
       setIsLoading(true);
       setError(null);
-      const memoList = getMemos();
+      const memoList = await getMemos();
       setMemos(memoList);
       setFilteredMemos(memoList);
     } catch (err) {
@@ -148,7 +148,7 @@ export function useMemo(options: UseMemoOptions = {}): UseMemoReturn {
     
     if (keyword.trim()) {
       try {
-        const searchResults = searchMemos({ keyword });
+        const searchResults = await searchMemos({ keyword });
         setFilteredMemos(searchResults.memos);
       } catch (err) {
         console.error('메모 검색 실패:', err);

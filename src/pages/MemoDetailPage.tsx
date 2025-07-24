@@ -33,12 +33,12 @@ const MemoDetailPage: React.FC = () => {
   ];
 
   // 메모 로드
-  const loadMemo = useCallback(() => {
+  const loadMemo = useCallback(async () => {
     if (!id) return;
 
     try {
       setIsLoading(true);
-      const memoData = getMemo(id);
+      const memoData = await getMemo(id);
       if (memoData) {
         setMemo(memoData);
       } else {

@@ -18,10 +18,10 @@ const HomePage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   // 메모 목록 로드
-  const loadMemos = () => {
+  const loadMemos = async () => {
     try {
       setIsLoading(true);
-      const memoList = getMemos();
+      const memoList = await getMemos();
       console.log('로드된 메모 목록:', memoList);
       console.log('메모 개수:', memoList.length);
       setMemos(memoList);
@@ -34,12 +34,12 @@ const HomePage: React.FC = () => {
   };
 
   // 검색 처리
-  const handleSearch = useCallback((keyword: string) => {
+  const handleSearch = useCallback(async (keyword: string) => {
     setSearchKeyword(keyword);
     
     if (keyword.trim()) {
       try {
-        const searchResults = searchMemos({ keyword });
+        const searchResults = await searchMemos({ keyword });
         setFilteredMemos(searchResults.memos);
       } catch (error) {
         console.error('검색 실패:', error);

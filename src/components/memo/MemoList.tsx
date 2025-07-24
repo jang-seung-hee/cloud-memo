@@ -25,10 +25,10 @@ const MemoList: React.FC<MemoListProps> = ({
   const [isLoading, setIsLoading] = useState(false);
 
   // 메모 목록 로드
-  const loadMemos = () => {
+  const loadMemos = async () => {
     try {
       setIsLoading(true);
-      const memoList = getMemos();
+      const memoList = await getMemos();
       setMemos(memoList);
       setFilteredMemos(memoList);
     } catch (error) {
@@ -39,7 +39,7 @@ const MemoList: React.FC<MemoListProps> = ({
   };
 
   // 검색 기능
-  const handleSearch = useCallback((keyword: string) => {
+  const handleSearch = useCallback(async (keyword: string) => {
     setSearchKeyword(keyword);
     
     if (!keyword.trim()) {
@@ -48,7 +48,7 @@ const MemoList: React.FC<MemoListProps> = ({
     }
 
     try {
-      const searchResults = searchMemos({ keyword });
+      const searchResults = await searchMemos({ keyword });
       setFilteredMemos(searchResults.memos);
     } catch (error) {
       console.error('메모 검색 실패:', error);

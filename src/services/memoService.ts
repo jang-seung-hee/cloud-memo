@@ -22,6 +22,7 @@ import {
   createDocument,
   updateDocument,
   deleteDocument,
+  getDocuments,
   COLLECTIONS
 } from './firebaseService';
 
@@ -53,20 +54,47 @@ const extractTitleFromContent = (content: string): string => {
 };
 
 // 메모 목록 가져오기
-const getMemos = (): Memo[] => {
+const getMemos = async (): Promise<Memo[]> => {
   if (!isStorageAvailable()) {
     throw new StorageError(ERROR_MESSAGES.STORAGE_NOT_AVAILABLE, 'STORAGE_NOT_AVAILABLE');
   }
 
   try {
-    const memosJson = localStorage.getItem(STORAGE_KEYS.MEMOS);
-    if (!memosJson) {
-      return [];
+    let memos: Memo[] = [];
+
+    // Firebase에서 데이터 가져오기 (인증된 사용자인 경우)
+    if (isFirebaseAvailable() && getCurrentUserId()) {
+      try {
+        console.log('Firebase에서 메모 데이터 가져오는 중...');
+        const firebaseMemos = await getDocuments<Memo>(COLLECTIONS.MEMOS, {
+          orderByField: 'updatedAt',
+          orderDirection: 'desc'
+        });
+        
+        console.log('Firebase에서 가져온 메모:', firebaseMemos);
+        
+        // Firebase 데이터를 로컬 스토리지에 저장
+        if (firebaseMemos.length > 0) {
+          const memosJson = safeJsonStringify(firebaseMemos);
+          if (memosJson) {
+            localStorage.setItem(STORAGE_KEYS.MEMOS, memosJson);
+          }
+          memos = firebaseMemos;
+        }
+      } catch (firebaseError) {
+        console.warn('Firebase에서 메모 가져오기 실패, 로컬 데이터 사용:', firebaseError);
+      }
     }
 
-    const memos = safeJsonParse<Memo[]>(memosJson, []);
-    if (!Array.isArray(memos)) {
-      return [];
+    // Firebase에서 데이터를 가져오지 못한 경우 로컬 데이터 사용
+    if (memos.length === 0) {
+      const memosJson = localStorage.getItem(STORAGE_KEYS.MEMOS);
+      if (memosJson) {
+        const localMemos = safeJsonParse<Memo[]>(memosJson, []);
+        if (Array.isArray(localMemos)) {
+          memos = localMemos;
+        }
+      }
     }
 
     // 기존 메모에 카테고리 필드가 없는 경우 기본값 추가
@@ -110,7 +138,7 @@ const createMemo = async (request: CreateMemoRequest): Promise<Memo> => {
     updatedAt: new Date().toISOString()
   };
 
-  const memos = getMemos();
+  const memos = await getMemos(); // 현재 메모 목록을 가져와서 크기 계산
   const dataSize = safeJsonStringify([...memos, newMemo])?.length || 0;
 
   if (!validateStorageLimit(dataSize)) {
@@ -142,8 +170,8 @@ const createMemo = async (request: CreateMemoRequest): Promise<Memo> => {
 };
 
 // 메모 조회
-const getMemo = (id: string): Memo | null => {
-  const memos = getMemos();
+const getMemo = async (id: string): Promise<Memo | null> => {
+  const memos = await getMemos();
   const memo = memos.find(memo => memo.id === id);
   if (memo) {
     // 카테고리가 없는 경우 기본값 추가
@@ -161,7 +189,7 @@ const updateMemo = async (id: string, request: UpdateMemoRequest): Promise<Memo>
     throw new StorageError(ERROR_MESSAGES.STORAGE_NOT_AVAILABLE, 'STORAGE_NOT_AVAILABLE');
   }
 
-  const memos = getMemos();
+  const memos = await getMemos(); // 현재 메모 목록을 가져와서 수정
   const memoIndex = memos.findIndex(memo => memo.id === id);
 
   if (memoIndex === -1) {
@@ -235,7 +263,7 @@ const deleteMemo = async (id: string): Promise<boolean> => {
     throw new StorageError(ERROR_MESSAGES.STORAGE_NOT_AVAILABLE, 'STORAGE_NOT_AVAILABLE');
   }
 
-  const memos = getMemos();
+  const memos = await getMemos(); // 현재 메모 목록을 가져와서 삭제
   const memoIndex = memos.findIndex(memo => memo.id === id);
 
   if (memoIndex === -1) {
@@ -267,8 +295,8 @@ const deleteMemo = async (id: string): Promise<boolean> => {
 };
 
 // 메모 검색
-const searchMemos = (params: MemoSearchParams): MemoListResponse => {
-  let memos = getMemos();
+const searchMemos = async (params: MemoSearchParams): Promise<MemoListResponse> => {
+  let memos = await getMemos();
 
   // 키워드 검색
   if (params.keyword) {
@@ -324,8 +352,8 @@ const searchMemos = (params: MemoSearchParams): MemoListResponse => {
 };
 
 // 메모 통계
-const getMemoStats = () => {
-  const memos = getMemos();
+const getMemoStats = async () => {
+  const memos = await getMemos();
   const totalMemos = memos.length;
   const totalCharacters = memos.reduce((sum, memo) => sum + memo.content.length, 0);
   const totalImages = memos.reduce((sum, memo) => sum + memo.images.length, 0);

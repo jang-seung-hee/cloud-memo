@@ -35,9 +35,9 @@ const ServiceTest: React.FC = () => {
     loadData();
   }, []);
 
-  const loadData = () => {
+  const loadData = async () => {
     try {
-      setMemos(getMemos());
+      setMemos(await getMemos());
       setImages(getImages());
       setTemplates(getTemplates());
     } catch (error) {
@@ -63,7 +63,7 @@ const ServiceTest: React.FC = () => {
         category: '임시'
       });
 
-      setMemos(getMemos());
+      setMemos(await getMemos());
       setMemoTitle('');
       setMemoContent('');
       showModal(`메모 생성 성공!\nID: ${newMemo.id}\n제목: ${newMemo.title || '(내용에서 자동 생성)'}`);
@@ -80,7 +80,7 @@ const ServiceTest: React.FC = () => {
     try {
       const result = await deleteMemo(id);
       if (result) {
-        setMemos(getMemos());
+        setMemos(await getMemos());
         showModal('메모 삭제 성공!');
       } else {
         alert('메모 삭제 실패');
@@ -173,9 +173,9 @@ const ServiceTest: React.FC = () => {
     }
   };
 
-  const showStats = () => {
+  const showStats = async () => {
     try {
-      const memoStats = getMemoStats();
+      const memoStats = await getMemoStats();
       const imageStats = getImageStats();
       const templateStats = getTemplateStats();
 
