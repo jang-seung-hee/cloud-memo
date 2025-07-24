@@ -135,52 +135,7 @@ const TemplateForm: React.FC<TemplateFormProps> = ({
           </div>
         </div>
 
-        {/* 분류 선택 */}
-        <div className="flex items-center space-x-4">
-          <label className="text-sm font-medium text-gray-700 dark:text-dark-text w-16 text-left">
-            분류
-          </label>
-          <div className="flex-1">
-            <div className="flex space-x-2">
-              {categories.map((cat) => {
-                const getCategoryStyle = (categoryName: string) => {
-                  if (categoryName === '임시') {
-                    return category === categoryName
-                      ? 'bg-yellow-500 text-white shadow-md'
-                      : 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border border-yellow-200';
-                  }
-                  if (categoryName === '기억') {
-                    return category === categoryName
-                      ? 'bg-blue-500 text-white shadow-md'
-                      : 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200';
-                  }
-                  if (categoryName === '보관') {
-                    return category === categoryName
-                      ? 'bg-red-500 text-white shadow-md'
-                      : 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-200';
-                  }
-                  return category === categoryName
-                    ? 'bg-primary-start text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-dark-bg-secondary dark:text-dark-text dark:hover:bg-dark-border';
-                };
 
-                return (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => setCategory(cat)}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${getCategoryStyle(cat)}`}
-                  >
-                    {cat}
-                  </button>
-                );
-              })}
-            </div>
-            {errors.category && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.category}</p>
-            )}
-          </div>
-        </div>
 
         {/* 내용 입력 */}
         <div>
@@ -189,15 +144,15 @@ const TemplateForm: React.FC<TemplateFormProps> = ({
             value={content}
             onChange={(e) => setContent(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="w-full h-48 px-3 py-2 border border-gray-300 dark:border-dark-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-start focus:border-primary-start resize-none bg-white dark:bg-dark-card text-gray-900 dark:text-dark-text"
+            className="w-full h-96 px-3 py-2 border border-gray-300 dark:border-dark-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-start focus:border-primary-start resize-none bg-white dark:bg-dark-card text-gray-900 dark:text-dark-text"
             style={{ fontFamily: 'inherit' }}
           />
-                      {errors.content && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.content}</p>
-            )}
-            <div className="mt-1 text-xs text-gray-500 dark:text-dark-text-muted">
-              {content.length}자 / 5,000자
-            </div>
+          {errors.content && (
+            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.content}</p>
+          )}
+          <div className="mt-1 text-xs text-gray-500 dark:text-dark-text-muted">
+            {content.length}자 / 5,000자
+          </div>
         </div>
 
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Button, Input, Icon } from '../ui';
+import { Button, Input, Icon, Modal } from '../ui';
 import { getTemplates, deleteTemplate } from '../../services';
 import type { Template } from '../../types/template';
 import TemplateForm from './TemplateForm';
@@ -20,12 +20,13 @@ const TemplateList: React.FC<TemplateListProps> = ({
   const [templates, setTemplates] = useState<Template[]>([]);
   const [filteredTemplates, setFilteredTemplates] = useState<Template[]>([]);
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [expandedTemplates, setExpandedTemplates] = useState<Set<string>>(new Set());
+  const [deleteConfirmTemplate, setDeleteConfirmTemplate] = useState<Template | null>(null);
 
   // 상용구 목록 로드
   const loadTemplates = () => {
@@ -41,40 +42,28 @@ const TemplateList: React.FC<TemplateListProps> = ({
     }
   };
 
-  // 검색 및 필터링
+  // 검색
   const handleSearch = useCallback((keyword: string) => {
     setSearchKeyword(keyword);
     
-    let filtered = templates;
-
-    // 카테고리 필터링
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(template => template.category === selectedCategory);
+    if (!keyword.trim()) {
+      setFilteredTemplates(templates);
+      return;
     }
 
-    // 키워드 검색 (제목과 내용에서 검색)
-    if (keyword.trim()) {
-      const lowerKeyword = keyword.toLowerCase();
-      filtered = filtered.filter(template => 
-        template.title.toLowerCase().includes(lowerKeyword) ||
-        template.content.toLowerCase().includes(lowerKeyword) ||
-        template.category.toLowerCase().includes(lowerKeyword)
-      );
-    }
+    // 키워드 검색 (제목과 내용에서만 검색)
+    const lowerKeyword = keyword.toLowerCase();
+    const filtered = templates.filter(template => 
+      template.title.toLowerCase().includes(lowerKeyword) ||
+      template.content.toLowerCase().includes(lowerKeyword)
+    );
 
     setFilteredTemplates(filtered);
-  }, [templates, selectedCategory]);
-
-  // 카테고리 변경
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category);
-    handleSearch(searchKeyword);
-  };
+  }, [templates]);
 
   // 검색 초기화
   const handleClearSearch = () => {
     setSearchKeyword('');
-    setSelectedCategory('all');
     setFilteredTemplates(templates);
   };
 
@@ -91,16 +80,33 @@ const TemplateList: React.FC<TemplateListProps> = ({
     onTemplateEdit?.(template);
   };
 
-  // 상용구 삭제
+  // 상용구 삭제 확인 모달 열기
   const handleDeleteTemplate = (templateId: string) => {
+    const template = templates.find(t => t.id === templateId);
+    if (!template) return;
+    setDeleteConfirmTemplate(template);
+  };
+
+  // 상용구 삭제 확인
+  const handleConfirmDelete = () => {
+    if (!deleteConfirmTemplate) return;
+
     try {
-      if (deleteTemplate(templateId)) {
+      if (deleteTemplate(deleteConfirmTemplate.id)) {
         loadTemplates(); // 목록 새로고침
-        onTemplateDelete?.(templateId);
+        onTemplateDelete?.(deleteConfirmTemplate.id);
       }
     } catch (error) {
       console.error('상용구 삭제 실패:', error);
+      alert('상용구 삭제에 실패했습니다.');
+    } finally {
+      setDeleteConfirmTemplate(null);
     }
+  };
+
+  // 상용구 삭제 취소
+  const handleCancelDelete = () => {
+    setDeleteConfirmTemplate(null);
   };
 
   // 상용구 선택
@@ -138,13 +144,12 @@ const TemplateList: React.FC<TemplateListProps> = ({
     loadTemplates();
   }, []);
 
-  // 검색어 또는 카테고리 변경 시 필터링
+  // 검색어 변경 시 필터링
   useEffect(() => {
     handleSearch(searchKeyword);
-  }, [templates, searchKeyword, selectedCategory, handleSearch]);
+  }, [templates, searchKeyword, handleSearch]);
 
-  // 카테고리 목록 추출 - 새로운 카테고리 시스템 적용
-  const categories = ['all', '임시', '기억', '보관'];
+
 
   // 텍스트 자르기 함수
   const truncateText = (text: string, maxLength: number) => {
@@ -179,12 +184,11 @@ const TemplateList: React.FC<TemplateListProps> = ({
           )}
           
           {/* 검색 결과 요약 */}
-          {(searchKeyword || selectedCategory !== 'all') && (
+          {searchKeyword && (
             <div className="mt-2 flex items-center justify-between text-xs sm:text-sm text-gray-600">
               <span>
                 {filteredTemplates.length}개의 상용구
                 {searchKeyword && ` (검색어: "${searchKeyword}")`}
-                {selectedCategory !== 'all' && ` (카테고리: ${selectedCategory})`}
               </span>
               <button
                 onClick={handleClearSearch}
@@ -196,55 +200,12 @@ const TemplateList: React.FC<TemplateListProps> = ({
           )}
         </div>
 
-        {/* 액션 버튼과 카테고리 필터 */}
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center justify-between">
-          {/* 새 상용구 버튼 */}
-          <Button onClick={handleCreateTemplate} variant="primary" className="flex items-center w-full sm:w-auto">
+        {/* 새 상용구 버튼 */}
+        <div className="flex justify-start">
+          <Button onClick={handleCreateTemplate} variant="primary" className="flex items-center">
             <Icon name="Plus" size={16} />
             <span className="ml-2">새 상용구</span>
           </Button>
-
-          {/* 카테고리 필터 */}
-          <div className="flex flex-wrap gap-1 sm:gap-2 w-full sm:w-auto">
-            {categories.map((category) => {
-              const getCategoryStyle = (cat: string) => {
-                if (cat === 'all') {
-                  return selectedCategory === cat
-                    ? 'bg-gray-600 text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-dark-bg-secondary dark:text-dark-text dark:hover:bg-dark-border';
-                }
-                if (cat === '임시') {
-                  return selectedCategory === cat
-                    ? 'bg-yellow-500 text-white shadow-md'
-                    : 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border border-yellow-200';
-                }
-                if (cat === '기억') {
-                  return selectedCategory === cat
-                    ? 'bg-blue-500 text-white shadow-md'
-                    : 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200';
-                }
-                if (cat === '보관') {
-                  return selectedCategory === cat
-                    ? 'bg-red-500 text-white shadow-md'
-                    : 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-200';
-                }
-                return selectedCategory === cat
-                  ? 'bg-primary-start text-white shadow-md'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-dark-bg-secondary dark:text-dark-text dark:hover:bg-dark-border';
-              };
-
-              return (
-                <button
-                  key={category}
-                  type="button"
-                  onClick={() => handleCategoryChange(category)}
-                  className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 flex-1 sm:flex-none min-w-0 ${getCategoryStyle(category)}`}
-                >
-                  <span className="truncate">{category === 'all' ? '전체' : category}</span>
-                </button>
-              );
-            })}
-          </div>
         </div>
       </div>
 
@@ -257,14 +218,13 @@ const TemplateList: React.FC<TemplateListProps> = ({
           </div>
         ) : filteredTemplates.length === 0 ? (
           <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-8 text-center">
-            {searchKeyword || selectedCategory !== 'all' ? (
+            {searchKeyword ? (
               <>
                 <Icon name="Search" size={40} className="sm:hidden mx-auto text-gray-400 mb-3" />
                 <Icon name="Search" size={48} className="hidden sm:block mx-auto text-gray-400 mb-4" />
                 <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">검색 결과가 없습니다</h3>
                 <p className="text-sm sm:text-base text-gray-600 mb-4">
                   {searchKeyword && `"${searchKeyword}"에 대한 `}
-                  {selectedCategory !== 'all' && `${selectedCategory} 카테고리의 `}
                   상용구를 찾을 수 없습니다.
                 </p>
                 <Button 
@@ -295,12 +255,9 @@ const TemplateList: React.FC<TemplateListProps> = ({
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
-                                         <h3 className="text-base sm:text-lg font-semibold text-gray-900 text-left">
-                       {template.title}
-                     </h3>
-                    <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded flex-shrink-0 self-start sm:self-auto">
-                      {template.category}
-                    </span>
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 text-left">
+                      {template.title}
+                    </h3>
                   </div>
                   <div className="text-gray-700 text-sm leading-relaxed mb-2 text-left whitespace-pre-wrap">
                     {expandedTemplates.has(template.id) 
@@ -359,6 +316,36 @@ const TemplateList: React.FC<TemplateListProps> = ({
           onSubmit={handleFormSubmit}
         />
       )}
+
+      {/* 삭제 확인 모달 */}
+      <Modal
+        isOpen={!!deleteConfirmTemplate}
+        onClose={handleCancelDelete}
+        title="상용구 삭제"
+        size="sm"
+      >
+        <div className="p-6">
+          <p className="text-gray-700 dark:text-dark-text mb-6">
+            상용구를 삭제하시겠습니까?<br />
+            삭제된 상용구는 복구할 수 없습니다.
+          </p>
+          <div className="flex justify-end space-x-3">
+            <Button
+              variant="outline"
+              onClick={handleCancelDelete}
+            >
+              취소
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleConfirmDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              삭제
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
