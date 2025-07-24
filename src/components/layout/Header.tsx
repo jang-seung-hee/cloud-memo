@@ -34,10 +34,10 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
       isActive: location.pathname === '/' || location.pathname === '/write'
     },
     {
-      id: 'templates',
-      label: '상용구 관리',
-      icon: 'Copy' as IconName,
-      isActive: location.pathname === '/templates'
+      id: 'new-memo',
+      label: '새 메모',
+      icon: 'Plus' as IconName,
+      isActive: false
     }
   ];
 
@@ -45,8 +45,8 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   const handleTabChange = (tabId: string) => {
     if (tabId === 'memos') {
       navigate('/');
-    } else if (tabId === 'templates') {
-      navigate('/templates');
+    } else if (tabId === 'new-memo') {
+      navigate('/write');
     }
   };
 
@@ -72,6 +72,16 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
 
             {/* 액션 버튼들 */}
             <div className="hidden md:flex items-center space-x-4">
+              {/* 상용구 관리 버튼 */}
+              <Button
+                onClick={() => navigate('/templates')}
+                variant="outline"
+                size="sm"
+                className="flex items-center bg-white border-blue-300 text-blue-700 hover:bg-blue-50"
+              >
+                <Icon name="Copy" size={16} />
+                <span className="ml-2">상용구관리</span>
+              </Button>
               {/* 동기화 상태 표시 */}
               <SyncStatus size="sm" showProgress={false} />
               {/* 로그인 상태 표시 */}
@@ -96,6 +106,21 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
           {isMenuOpen && (
             <div className="md:hidden">
               <div className="px-2 pt-2 pb-3 space-y-1 bg-white dark:bg-dark-card border-t border-gray-200 dark:border-dark-border">
+                {/* 상용구 관리 버튼 */}
+                <div className="px-3 py-2">
+                  <Button
+                    onClick={() => {
+                      navigate('/templates');
+                      closeMenu();
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="w-full flex items-center justify-center bg-white border-blue-300 text-blue-700 hover:bg-blue-50"
+                  >
+                    <Icon name="Copy" size={16} />
+                    <span className="ml-2">상용구관리</span>
+                  </Button>
+                </div>
                 {/* 로그인 상태 표시 */}
                 <div className="px-3 py-2">
                   <UserProfile size="md" />

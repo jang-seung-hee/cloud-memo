@@ -85,12 +85,12 @@ const MemoDetail: React.FC<MemoDetailProps> = ({
       
       {/* ID 정보 */}
       <div className="text-sm text-gray-500 dark:text-dark-text-muted mb-3">
-        <div>ID: {memo.id}</div>
+                        <div>{new Date(memo.createdAt).toLocaleDateString('ko-KR')}에 작성됨</div>
       </div>
 
       {/* 내용 */}
       <div className="mb-4">
-        <div className="whitespace-pre-wrap text-gray-700 dark:text-dark-text leading-relaxed bg-white dark:bg-dark-card rounded-lg p-3 border border-gray-200 dark:border-dark-border">
+        <div className="whitespace-pre-wrap break-words overflow-wrap-anywhere text-gray-700 dark:text-dark-text leading-relaxed bg-white dark:bg-dark-card rounded-lg p-3 border border-gray-200 dark:border-dark-border">
           {memo.content}
         </div>
       </div>

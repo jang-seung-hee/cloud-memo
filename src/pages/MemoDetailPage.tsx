@@ -25,10 +25,10 @@ const MemoDetailPage: React.FC = () => {
       isActive: activeTab === 'memos'
     },
     {
-      id: 'templates',
-      label: '상용구 관리',
-      icon: 'Copy' as IconName,
-      isActive: activeTab === 'templates'
+      id: 'new-memo',
+      label: '새 메모',
+      icon: 'Plus' as IconName,
+      isActive: activeTab === 'new-memo'
     }
   ];
 
@@ -107,8 +107,8 @@ const MemoDetailPage: React.FC = () => {
     setActiveTab(tabId);
     if (tabId === 'memos') {
       navigate('/');
-    } else if (tabId === 'templates') {
-      navigate('/templates');
+    } else if (tabId === 'new-memo') {
+      navigate('/write');
     }
   };
 
@@ -153,8 +153,8 @@ const MemoDetailPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-secondary-start to-secondary-end dark:from-dark-bg dark:to-dark-bg-secondary pb-20">
-      <div className="w-full h-full sm:max-w-4xl sm:mx-auto sm:px-6 sm:py-8">
+    <div className="min-h-screen bg-gradient-to-br from-secondary-start to-secondary-end dark:from-dark-bg dark:to-dark-bg-secondary pb-20 overflow-x-hidden">
+      <div className="w-full h-full sm:max-w-4xl sm:mx-auto sm:px-6 sm:py-8 overflow-x-hidden">
         {/* 헤더 */}
                  <div className="sticky top-0 z-10 bg-gradient-to-br from-secondary-start to-secondary-end dark:from-dark-bg dark:to-dark-bg-secondary backdrop-blur-sm border-b border-gray-200 dark:border-dark-border sm:border-none sm:bg-transparent sm:backdrop-blur-none">
            <div className="flex items-center justify-between p-4 sm:p-0">
@@ -164,48 +164,45 @@ const MemoDetailPage: React.FC = () => {
                  variant="ghost"
                  className="mr-3 sm:hidden"
                >
-                 <Icon name="ChevronLeft" size={20} />
+                 <Icon name="ChevronLeft" size={14} />
                </Button>
              </div>
                            <div className="flex-1 text-center">
                 <h1 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-dark-text">메모 상세</h1>
-                <p className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600 dark:text-dark-text-muted">
-                  {new Date(memo.createdAt).toLocaleDateString('ko-KR')}에 작성됨
-                </p>
               </div>
-             <div className="flex items-center space-x-2">
+             <div className="flex items-center space-x-1">
                <Button
                  onClick={handleCopyMemo}
                  variant="ghost"
                  size="sm"
-                 className="p-2"
+                 className="p-1.5 sm:p-1"
                >
-                 <Icon name="Copy" size={20} />
+                 <Icon name="Copy" size={14} />
                </Button>
                <Button
                  onClick={handleEditMemo}
                  variant="ghost"
                  size="sm"
-                 className="p-2"
+                 className="p-1.5 sm:p-1"
                >
-                 <Icon name="Edit" size={20} />
+                 <Icon name="Edit" size={14} />
                </Button>
                <Button
                  onClick={handleDeleteMemo}
                  variant="ghost"
                  size="sm"
-                 className="p-2 text-red-500 hover:text-red-700"
+                 className="p-1.5 sm:p-1 text-red-500 hover:text-red-700"
                >
-                 <Icon name="Trash2" size={20} />
+                 <Icon name="Trash2" size={14} />
                </Button>
              </div>
            </div>
          </div>
 
                  {/* 메모 상세 내용 */}
-         <div className="px-4 sm:px-0">
-           <div className="max-w-4xl mx-auto">
-             <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm border border-gray-200 dark:border-dark-border p-4 sm:p-6">
+         <div className="px-4 sm:px-0 overflow-x-hidden">
+           <div className="max-w-4xl mx-auto overflow-x-hidden">
+             <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm border border-gray-200 dark:border-dark-border p-4 sm:p-6 overflow-x-hidden">
                <MemoDetail
                  memo={memo}
                  onEdit={handleEditMemo}
