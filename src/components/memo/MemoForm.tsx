@@ -49,14 +49,12 @@ const MemoForm: React.FC<MemoFormProps> = ({
     if (isMobile) return;
     
     const items = e.clipboardData.items;
-    let hasImage = false;
 
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       
       if (item.type.startsWith('image/')) {
         e.preventDefault();
-        hasImage = true;
         
         try {
           setIsProcessingClipboard(true);
@@ -112,13 +110,11 @@ const MemoForm: React.FC<MemoFormProps> = ({
       const items = e.clipboardData?.items;
       if (!items) return;
 
-      let hasImage = false;
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
         
         if (item.type.startsWith('image/')) {
           e.preventDefault();
-          hasImage = true;
           
           try {
             setIsProcessingClipboard(true);
@@ -175,20 +171,7 @@ const MemoForm: React.FC<MemoFormProps> = ({
 
 
 
-  // 클립보드 접근 권한 확인 및 요청
-  const requestClipboardPermission = async () => {
-    if (navigator.clipboard && navigator.permissions) {
-      try {
-        const result = await navigator.permissions.query({ name: 'clipboard-read' as PermissionName });
-        console.log('클립보드 권한 상태:', result.state);
-        return result.state;
-      } catch (error) {
-        console.log('클립보드 권한 확인 실패:', error);
-        return 'denied';
-      }
-    }
-    return 'granted'; // 기본적으로 허용
-  };
+
 
   // 카메라 촬영
   const handleCameraCapture = () => {

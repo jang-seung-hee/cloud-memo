@@ -19,7 +19,7 @@ const MemoList: React.FC<MemoListProps> = ({
   const [memos, setMemos] = useState<Memo[]>([]);
   const [filteredMemos, setFilteredMemos] = useState<Memo[]>([]);
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<MemoCategory | '전체'>('전체');
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingMemo, setEditingMemo] = useState<Memo | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -38,54 +38,25 @@ const MemoList: React.FC<MemoListProps> = ({
     }
   };
 
-  // 검색 및 필터링 기능
+  // 검색 기능
   const handleSearch = useCallback((keyword: string) => {
     setSearchKeyword(keyword);
     
-    let filtered = memos;
-    
-    // 카테고리 필터링
-    if (selectedCategory !== '전체') {
-      filtered = filtered.filter(memo => memo.category === selectedCategory);
+    if (!keyword.trim()) {
+      setFilteredMemos(memos);
+      return;
     }
-    
-    // 검색어 필터링
-    if (keyword.trim()) {
-      try {
-        const searchResults = searchMemos({ keyword });
-        filtered = filtered.filter(memo => 
-          searchResults.memos.some(searchMemo => searchMemo.id === memo.id)
-        );
-      } catch (error) {
-        console.error('메모 검색 실패:', error);
-        filtered = [];
-      }
-    }
-    
-    setFilteredMemos(filtered);
-  }, [memos, selectedCategory]);
 
-  // 카테고리 필터링
-  const handleCategoryFilter = useCallback((category: MemoCategory | '전체') => {
-    setSelectedCategory(category);
-    
-    let filtered = memos;
-    
-    // 카테고리 필터링
-    if (category !== '전체') {
-      filtered = filtered.filter(memo => memo.category === category);
+    try {
+      const searchResults = searchMemos({ keyword });
+      setFilteredMemos(searchResults.memos);
+    } catch (error) {
+      console.error('메모 검색 실패:', error);
+      setFilteredMemos([]);
     }
-    
-    // 검색어 필터링
-    if (searchKeyword.trim()) {
-      filtered = filtered.filter(memo => 
-        memo.content.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-        (memo.title && memo.title.toLowerCase().includes(searchKeyword.toLowerCase()))
-      );
-    }
-    
-    setFilteredMemos(filtered);
-  }, [memos, searchKeyword]);
+  }, [memos]);
+
+
 
   // 메모 생성
   const handleCreateMemo = () => {
@@ -129,10 +100,10 @@ const MemoList: React.FC<MemoListProps> = ({
     loadMemos();
   }, []);
 
-  // 검색어 또는 카테고리 변경 시 필터링
+  // 검색어 변경 시 필터링
   useEffect(() => {
     handleSearch(searchKeyword);
-  }, [memos, searchKeyword, selectedCategory, handleSearch]);
+  }, [memos, searchKeyword, handleSearch]);
 
   return (
     <div className={`memo-list w-full ${className}`}>
