@@ -20,9 +20,6 @@ const TemplateForm: React.FC<TemplateFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ title?: string; content?: string; category?: string }>({});
 
-  // 카테고리 목록
-  const categories = ['임시', '기억', '보관'];
-
   // 편집 모드인 경우 기존 데이터 로드
   useEffect(() => {
     if (template) {
