@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Button, Input, Icon } from '../components/ui';
-import type { IconName } from '../components/ui/Icon';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Button, Icon } from '../components/ui';
 import { getMemos, deleteMemo, searchMemos } from '../services';
 import type { Memo } from '../types/memo';
 import MemoItem from '../components/memo/MemoItem';
@@ -34,7 +33,7 @@ const HomePage: React.FC = () => {
   };
 
   // 검색 처리
-  const handleSearch = (keyword: string) => {
+  const handleSearch = useCallback((keyword: string) => {
     setSearchKeyword(keyword);
     
     if (keyword.trim()) {
@@ -48,7 +47,7 @@ const HomePage: React.FC = () => {
     } else {
       setFilteredMemos(memos);
     }
-  };
+  }, [memos]);
 
   // 새 메모 생성
   const handleCreateMemo = () => {
@@ -93,7 +92,7 @@ const HomePage: React.FC = () => {
   // 검색어 변경 시 필터링
   useEffect(() => {
     handleSearch(searchKeyword);
-  }, [memos, searchKeyword]);
+  }, [memos, searchKeyword, handleSearch]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-secondary-start to-secondary-end dark:from-dark-bg dark:to-dark-bg-secondary pb-20">

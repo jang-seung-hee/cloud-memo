@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Button, Icon } from '../components/ui';
+import { Card } from '../components/ui';
 import { TemplateList, TemplateSelector, TemplateSlider } from '../components/template';
 import type { Template } from '../types/template';
 

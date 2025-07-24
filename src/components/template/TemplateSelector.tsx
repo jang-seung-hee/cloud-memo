@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button, Icon, Modal } from '../ui';
 import { getTemplates, searchTemplates } from '../../services';
 import type { Template } from '../../types/template';
@@ -34,7 +34,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
   };
 
   // 검색 및 필터링
-  const handleSearch = (keyword: string) => {
+  const handleSearch = useCallback((keyword: string) => {
     setSearchKeyword(keyword);
     
     let filtered = templates;
@@ -58,7 +58,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
     }
 
     setFilteredTemplates(filtered);
-  };
+  }, [templates, selectedCategory]);
 
   // 카테고리 변경
   const handleCategoryChange = (category: string) => {
@@ -99,7 +99,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
     if (isOpen) {
       handleSearch(searchKeyword);
     }
-  }, [templates, searchKeyword, selectedCategory, isOpen]);
+  }, [templates, searchKeyword, selectedCategory, isOpen, handleSearch]);
 
   // 카테고리 목록 추출
   const categories = ['all', ...Array.from(new Set(templates.map(t => t.category)))];

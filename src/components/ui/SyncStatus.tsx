@@ -20,8 +20,6 @@ const SyncStatus: React.FC<SyncStatusProps> = ({
 }) => {
   const { state: authState } = useAuthContext();
   const { 
-    syncState, 
-    networkState, 
     startManualSync, 
     retrySync, 
     toggleAutoSync,

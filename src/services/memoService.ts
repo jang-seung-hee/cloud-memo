@@ -18,14 +18,7 @@ import {
 } from './localStorageService';
 import { 
   isFirebaseAvailable, 
-  getCurrentUserId,
-  createDocument,
-  getDocument,
-  updateDocument,
-  deleteDocument,
-  getDocuments,
-  COLLECTIONS,
-  convertTimestampToDate
+  getCurrentUserId
 } from './firebaseService';
 import syncService from './syncService';
 import { SyncOperation } from '../types/sync';

@@ -21,10 +21,10 @@ const ImageAttachmentTest: React.FC = () => {
     }
   };
 
-  // 이미지 선택 처리
-  const handleImageSelect = (image: Image) => {
-    setSelectedImage(image);
-  };
+  // 이미지 선택 처리 (사용하지 않음)
+  // const handleImageSelect = (image: Image) => {
+  //   setSelectedImage(image);
+  // };
 
   // 모든 이미지 삭제
   const handleClearAll = () => {

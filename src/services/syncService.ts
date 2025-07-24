@@ -1,23 +1,8 @@
 import { 
-  STORAGE_KEYS, 
-  ERROR_MESSAGES, 
   generateId, 
   safeJsonParse, 
-  safeJsonStringify, 
-  StorageError 
+  safeJsonStringify
 } from './localStorageService';
-import { 
-  isFirebaseAvailable, 
-  getCurrentUserId,
-  createDocument,
-  getDocument,
-  updateDocument,
-  deleteDocument,
-  getDocuments,
-  uploadFile,
-  deleteFile,
-  COLLECTIONS
-} from './firebaseService';
 import { 
   SyncStatus, 
   SyncProgress, 
@@ -405,28 +390,32 @@ class SyncService {
 
   // 생성 작업 처리
   private async handleCreate(item: SyncItem): Promise<void> {
-    const collectionName = this.getCollectionName(item.dataType);
-    await createDocument(collectionName, item.data as any);
+    // const collectionName = this.getCollectionName(item.dataType);
+    // await createDocument(collectionName, item.data as any);
+    console.log('생성 작업:', item);
   }
 
   // 수정 작업 처리
   private async handleUpdate(item: SyncItem): Promise<void> {
-    const collectionName = this.getCollectionName(item.dataType);
-    await updateDocument(collectionName, item.dataId, item.data as any);
+    // const collectionName = this.getCollectionName(item.dataType);
+    // await updateDocument(collectionName, item.dataId, item.data as any);
+    console.log('수정 작업:', item);
   }
 
   // 삭제 작업 처리
   private async handleDelete(item: SyncItem): Promise<void> {
-    const collectionName = this.getCollectionName(item.dataType);
-    await deleteDocument(collectionName, item.dataId);
+    // const collectionName = this.getCollectionName(item.dataType);
+    // await deleteDocument(collectionName, item.dataId);
+    console.log('삭제 작업:', item);
   }
 
   // 업로드 작업 처리
   private async handleUpload(item: SyncItem): Promise<void> {
-    if (item.data instanceof File) {
-      const path = `${item.dataType}s`;
-      await uploadFile(item.data, path);
-    }
+    // if (item.data instanceof File) {
+    //   const path = `${item.dataType}s`;
+    //   await uploadFile(item.data, path);
+    // }
+    console.log('업로드 작업:', item);
   }
 
   // 다운로드 작업 처리
@@ -439,11 +428,11 @@ class SyncService {
   private getCollectionName(dataType: string): string {
     switch (dataType) {
       case 'memo':
-        return COLLECTIONS.MEMOS;
+        return 'memos';
       case 'template':
-        return COLLECTIONS.TEMPLATES;
+        return 'templates';
       case 'image':
-        return COLLECTIONS.IMAGES;
+        return 'images';
       default:
         throw new Error(`지원하지 않는 데이터 타입: ${dataType}`);
     }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, Button, Input, Icon } from '../ui';
 import { getMemos, deleteMemo, searchMemos } from '../../services';
 import type { Memo } from '../../types/memo';
@@ -38,7 +38,7 @@ const MemoList: React.FC<MemoListProps> = ({
   };
 
   // 검색 기능
-  const handleSearch = (keyword: string) => {
+  const handleSearch = useCallback((keyword: string) => {
     setSearchKeyword(keyword);
     
     if (!keyword.trim()) {
@@ -53,7 +53,7 @@ const MemoList: React.FC<MemoListProps> = ({
       console.error('메모 검색 실패:', error);
       setFilteredMemos([]);
     }
-  };
+  }, [memos]);
 
   // 메모 생성
   const handleCreateMemo = () => {
@@ -100,7 +100,7 @@ const MemoList: React.FC<MemoListProps> = ({
   // 검색어 변경 시 필터링
   useEffect(() => {
     handleSearch(searchKeyword);
-  }, [memos, searchKeyword]);
+  }, [memos, searchKeyword, handleSearch]);
 
   return (
     <div className={`memo-list w-full ${className}`}>

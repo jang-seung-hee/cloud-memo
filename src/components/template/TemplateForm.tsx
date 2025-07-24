@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Input, Icon } from '../ui';
+import { Modal, Button, Icon } from '../ui';
 import { createTemplate, updateTemplate } from '../../services';
 import type { Template } from '../../types/template';
 

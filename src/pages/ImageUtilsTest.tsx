@@ -1,17 +1,11 @@
 import React, { useState } from 'react';
 import { Button, Card, Modal, Icon } from '../components/ui';
 import {
-  validateImageFile,
   getImageInfo,
   compressImage,
   resizeImage,
   generateThumbnail,
-  encodeImage,
-  decodeImage,
   autoAdjustQuality,
-  captureImage,
-  selectImage,
-  captureImageDirect,
   processImage,
   ImageInfo
 } from '../utils/imageUtils';
@@ -120,47 +114,47 @@ const ImageUtilsTest: React.FC = () => {
     }
   };
 
-  const handleSelectImage = async () => {
-    try {
-      const result = await selectImage({
-        maxWidth: 1200,
-        maxHeight: 800,
-        quality: 0.8
-      });
+  // const handleSelectImage = async () => {
+  //   try {
+  //     const result = await selectImage({
+  //       maxWidth: 1200,
+  //       maxHeight: 800,
+  //       quality: 0.8
+  //     });
 
-      setSelectedFile(result.file);
-      setProcessedImage(result.dataUrl);
-      setImageInfo(result.info);
-      showModal(`갤러리에서 이미지 선택 완료!\n파일명: ${result.file.name}\n크기: ${result.info.width}x${result.info.height}\n파일 크기: ${(result.file.size / 1024).toFixed(1)}KB`);
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('취소')) {
-        // 사용자가 취소한 경우는 알림하지 않음
-        return;
-      }
-      alert(`이미지 선택 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
-    }
-  };
+  //     setSelectedFile(result.file);
+  //     setProcessedImage(result.dataUrl);
+  //     setImageInfo(result.info);
+  //     showModal(`갤러리에서 이미지 선택 완료!\n파일명: ${result.file.name}\n크기: ${result.info.width}x${result.info.height}\n파일 크기: ${(result.file.size / 1024).toFixed(1)}KB`);
+  //   } catch (error) {
+  //     if (error instanceof Error && error.message.includes('취소')) {
+  //       // 사용자가 취소한 경우는 알림하지 않음
+  //       return;
+  //     }
+  //     alert(`이미지 선택 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
+  //   }
+  // };
 
-  const handleCaptureImage = async () => {
-    try {
-      const result = await captureImageDirect({
-        maxWidth: 1200,
-        maxHeight: 800,
-        quality: 0.8
-      });
+  // const handleCaptureImage = async () => {
+  //   try {
+  //     const result = await captureImageDirect({
+  //       maxWidth: 1200,
+  //       maxHeight: 800,
+  //       quality: 0.8
+  //     });
 
-      setSelectedFile(result.file);
-      setProcessedImage(result.dataUrl);
-      setImageInfo(result.info);
-      showModal(`카메라 촬영 완료!\n파일명: ${result.file.name}\n크기: ${result.info.width}x${result.info.height}\n파일 크기: ${(result.file.size / 1024).toFixed(1)}KB`);
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('취소')) {
-        // 사용자가 취소한 경우는 알림하지 않음
-        return;
-      }
-      alert(`카메라 촬영 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
-    }
-  };
+  //     setSelectedFile(result.file);
+  //     setProcessedImage(result.dataUrl);
+  //     setImageInfo(result.info);
+  //     showModal(`카메라 촬영 완료!\n파일명: ${result.file.name}\n크기: ${result.info.width}x${result.info.height}\n파일 크기: ${(result.file.size / 1024).toFixed(1)}KB`);
+  //   } catch (error) {
+  //     if (error instanceof Error && error.message.includes('취소')) {
+  //       // 사용자가 취소한 경우는 알림하지 않음
+  //       return;
+  //     }
+  //     alert(`카메라 촬영 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
+  //   }
+  // };
 
   const handleProcessImage = async (source: 'camera' | 'gallery' | 'capture') => {
     try {

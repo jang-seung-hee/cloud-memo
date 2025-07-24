@@ -8,7 +8,7 @@ const PerformanceTest: React.FC = () => {
   const [testData, setTestData] = useState<Memo[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [performanceMetrics, setPerformanceMetrics] = useState<any>(null);
-  const [selectedTest, setSelectedTest] = useState<string>('');
+  // const [selectedTest, setSelectedTest] = useState<string>('');
 
   // 테스트 데이터 생성
   const generateTestData = useCallback((count: number) => {
@@ -39,7 +39,7 @@ const PerformanceTest: React.FC = () => {
 
   // 성능 테스트 실행
   const runPerformanceTest = useCallback((testType: string) => {
-    setSelectedTest(testType);
+    // setSelectedTest(testType);
     const startTime = performance.now();
     
     switch (testType) {

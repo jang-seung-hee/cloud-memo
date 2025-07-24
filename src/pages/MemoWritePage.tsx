@@ -1,25 +1,23 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Icon } from '../components/ui';
 import MemoForm from '../components/memo/MemoForm';
-import type { Memo } from '../types/memo';
+// import type { Memo } from '../types/memo';
 import SyncStatus from '../components/ui/SyncStatus';
 import { useAuthContext } from '../contexts/AuthContext';
 
 const MemoWritePage: React.FC = () => {
   const navigate = useNavigate();
   const { state: authState } = useAuthContext();
-  const [isFormOpen, setIsFormOpen] = useState(true);
+  // const [isFormOpen, setIsFormOpen] = useState(true);
 
   // 폼 닫기
   const handleFormClose = () => {
-    setIsFormOpen(false);
     navigate('/');
   };
 
   // 폼 제출 완료
   const handleFormSubmit = () => {
-    setIsFormOpen(false);
     navigate('/');
   };
 

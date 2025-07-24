@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, Button, Icon, BottomTabBar } from '../components/ui';
 import type { IconName } from '../components/ui/Icon';
@@ -33,7 +33,7 @@ const MemoDetailPage: React.FC = () => {
   ];
 
   // 메모 로드
-  const loadMemo = () => {
+  const loadMemo = useCallback(() => {
     if (!id) return;
 
     try {
@@ -51,7 +51,7 @@ const MemoDetailPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [id]);
 
   // 메모 수정
   const handleEditMemo = () => {
@@ -115,7 +115,7 @@ const MemoDetailPage: React.FC = () => {
   // 컴포넌트 마운트 시 메모 로드
   useEffect(() => {
     loadMemo();
-  }, [id]);
+  }, [id, loadMemo]);
 
   if (isLoading) {
     return (

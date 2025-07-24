@@ -57,31 +57,6 @@ const VirtualizedMemoList: React.FC<VirtualizedMemoListProps> = ({
     }
   }, []);
 
-  // 메모 아이템 렌더링
-  const renderMemoItem = useCallback((memo: Memo, index: number) => {
-    const actualIndex = virtualizedData.startIndex + index;
-    
-    return (
-      <div
-        key={memo.id}
-        style={{
-          position: 'absolute',
-          top: (actualIndex * itemHeight) - virtualizedData.offsetY,
-          height: itemHeight,
-          width: '100%'
-        }}
-      >
-        <MemoItem
-          memo={memo}
-          onSelect={() => onSelect?.(memo)}
-          onEdit={() => onEdit?.(memo)}
-          onDelete={() => onDelete?.(memo.id)}
-          className="h-full"
-        />
-      </div>
-    );
-  }, [virtualizedData.startIndex, virtualizedData.offsetY, itemHeight, onSelect, onEdit, onDelete]);
-
   // 간단한 메모 아이템 컴포넌트 (성능 최적화)
   const MemoItem = React.memo<{
     memo: Memo;
@@ -181,6 +156,33 @@ const VirtualizedMemoList: React.FC<VirtualizedMemoListProps> = ({
       </Card>
     );
   });
+
+  // 메모 아이템 렌더링
+  const renderMemoItem = useCallback((memo: Memo, index: number) => {
+    const actualIndex = virtualizedData.startIndex + index;
+    
+    return (
+      <div
+        key={memo.id}
+        style={{
+          position: 'absolute',
+          top: (actualIndex * itemHeight) - virtualizedData.offsetY,
+          height: itemHeight,
+          width: '100%'
+        }}
+      >
+        <MemoItem
+          memo={memo}
+          onSelect={() => onSelect?.(memo)}
+          onEdit={() => onEdit?.(memo)}
+          onDelete={() => onDelete?.(memo.id)}
+          className="h-full"
+        />
+      </div>
+    );
+  }, [virtualizedData.startIndex, virtualizedData.offsetY, itemHeight, onSelect, onEdit, onDelete, MemoItem]);
+
+
 
   if (memos.length === 0) {
     return (

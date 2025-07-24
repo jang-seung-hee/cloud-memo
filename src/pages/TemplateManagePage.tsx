@@ -1,12 +1,12 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button, Icon } from '../components/ui';
+// import { useNavigate } from 'react-router-dom';
+// import { Button, Icon } from '../components/ui';
 import { TemplateList } from '../components/template';
 import SyncStatus from '../components/ui/SyncStatus';
 import { useAuthContext } from '../contexts/AuthContext';
 
 const TemplateManagePage: React.FC = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const { state: authState } = useAuthContext();
 
   const handleTemplateSelect = (template: any) => {

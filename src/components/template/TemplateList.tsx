@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Button, Input, Icon } from '../ui';
-import { getTemplates, deleteTemplate, searchTemplates } from '../../services';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Button, Input, Icon } from '../ui';
+import { getTemplates, deleteTemplate } from '../../services';
 import type { Template } from '../../types/template';
 import TemplateForm from './TemplateForm';
 
@@ -42,7 +42,7 @@ const TemplateList: React.FC<TemplateListProps> = ({
   };
 
   // 검색 및 필터링
-  const handleSearch = (keyword: string) => {
+  const handleSearch = useCallback((keyword: string) => {
     setSearchKeyword(keyword);
     
     let filtered = templates;
@@ -63,7 +63,7 @@ const TemplateList: React.FC<TemplateListProps> = ({
     }
 
     setFilteredTemplates(filtered);
-  };
+  }, [templates, selectedCategory]);
 
   // 카테고리 변경
   const handleCategoryChange = (category: string) => {
@@ -141,7 +141,7 @@ const TemplateList: React.FC<TemplateListProps> = ({
   // 검색어 또는 카테고리 변경 시 필터링
   useEffect(() => {
     handleSearch(searchKeyword);
-  }, [templates, searchKeyword, selectedCategory]);
+  }, [templates, searchKeyword, selectedCategory, handleSearch]);
 
   // 카테고리 목록 추출
   const categories = ['all', ...Array.from(new Set(templates.map(t => t.category)))];

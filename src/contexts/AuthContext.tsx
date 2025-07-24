@@ -7,7 +7,7 @@ import {
   User as FirebaseUser 
 } from 'firebase/auth';
 import { auth } from '../config/firebase';
-import type { User, AuthState, LoginRequest, SignUpRequest } from '../types/auth';
+import type { User, AuthState, LoginRequest } from '../types/auth';
 import { mapFirebaseUser } from '../types/auth';
 
 // 액션 타입 정의

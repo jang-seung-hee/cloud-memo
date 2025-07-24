@@ -12,9 +12,7 @@ import {
 } from './localStorageService';
 import { 
   isFirebaseAvailable, 
-  getCurrentUserId,
-  uploadFile,
-  deleteFile
+  getCurrentUserId
 } from './firebaseService';
 import syncService from './syncService';
 import { SyncOperation } from '../types/sync';

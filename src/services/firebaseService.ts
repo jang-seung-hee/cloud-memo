@@ -17,16 +17,12 @@ import {
   ref, 
   uploadBytes, 
   getDownloadURL, 
-  deleteObject,
-  listAll 
+  deleteObject
 } from 'firebase/storage';
 import { db, storage } from '../config/firebase';
 import { 
-  STORAGE_KEYS, 
   ERROR_MESSAGES, 
   STORAGE_LIMITS,
-  generateId, 
-  safeJsonParse, 
   safeJsonStringify, 
   StorageError 
 } from './localStorageService';
