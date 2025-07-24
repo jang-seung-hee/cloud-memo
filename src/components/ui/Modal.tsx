@@ -56,7 +56,7 @@ const Modal: React.FC<ModalProps> = ({
     md: 'max-w-md w-full mx-4',
     lg: 'max-w-lg w-full mx-4 sm:max-w-2xl',
     xl: 'max-w-xl w-full mx-4 sm:max-w-4xl',
-    '2xl': 'max-w-2xl w-full mx-4 sm:max-w-5xl',
+    '2xl': 'max-w-2xl w-full mx-4 sm:max-w-6xl',
     full: 'max-w-full w-full mx-2 sm:mx-4'
   };
 
@@ -78,10 +78,10 @@ const Modal: React.FC<ModalProps> = ({
       
       {/* 모달 컨테이너 */}
       <div className="flex min-h-full items-center justify-center p-2 sm:p-4">
-        <div className={`relative bg-white dark:bg-dark-card rounded-lg shadow-xl dark:shadow-dark w-full ${sizeClasses[size]} ${className}`}>
+        <div className={`relative bg-white dark:bg-dark-card rounded-lg shadow-xl dark:shadow-dark w-full h-full sm:h-auto flex flex-col ${sizeClasses[size]} ${className}`}>
           {/* 모달 헤더 */}
           {(title || !hideCloseButton) && (
-            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-dark-border">
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-dark-border flex-shrink-0">
               {title && (
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text">{title}</h3>
               )}
@@ -99,15 +99,15 @@ const Modal: React.FC<ModalProps> = ({
           )}
           
           {/* 모달 내용 */}
-          <div className="p-4 sm:p-6">
+          <div className="p-3 sm:p-6 flex-1 overflow-y-auto">
             {children}
           </div>
           
           {/* 모달 액션 */}
           {actions && (
-                      <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-bg-secondary">
-            {actions}
-          </div>
+            <div className="flex items-center justify-end gap-3 p-4 sm:p-6 border-t border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-bg-secondary flex-shrink-0">
+              {actions}
+            </div>
           )}
         </div>
       </div>

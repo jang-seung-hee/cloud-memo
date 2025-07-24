@@ -19,7 +19,7 @@ import {
   getDownloadURL, 
   deleteObject
 } from 'firebase/storage';
-import { db, storage } from '../config/firebase';
+import { db, storage, auth } from '../config/firebase';
 import { 
   ERROR_MESSAGES, 
   STORAGE_LIMITS,
@@ -67,9 +67,13 @@ const isFirebaseAvailable = (): boolean => {
 
 const getCurrentUserId = (): string | null => {
   // AuthContext에서 사용자 ID를 가져오는 로직
-  // 실제 구현에서는 AuthContext와 연동 필요
-  // 임시로 localStorage에서 가져오지만, 추후 AuthContext와 연동 예정
-  return localStorage.getItem('current_user_id');
+  // Firebase Auth에서 현재 인증된 사용자 ID를 가져옴
+  try {
+    const currentUser = auth.currentUser;
+    return currentUser?.uid || null;
+  } catch {
+    return null;
+  }
 };
 
 const validateFirebaseData = (data: unknown): boolean => {

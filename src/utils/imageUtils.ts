@@ -48,8 +48,8 @@ export const SUPPORTED_IMAGE_EXTENSIONS = [
 
 // 기본 설정값
 export const DEFAULT_IMAGE_OPTIONS: Required<ImageProcessingOptions> = {
-  maxWidth: 1920,
-  maxHeight: 1080,
+  maxWidth: 1280,
+  maxHeight: 720,
   quality: 0.8,
   format: 'jpeg',
   maintainAspectRatio: true
@@ -64,8 +64,8 @@ export const DEFAULT_THUMBNAIL_OPTIONS: Required<ThumbnailOptions> = {
 
 export const DEFAULT_CAMERA_OPTIONS: Required<CameraOptions> = {
   facingMode: 'environment',
-  width: 1920,
-  height: 1080,
+  width: 1280,
+  height: 720,
   quality: 0.8
 };
 

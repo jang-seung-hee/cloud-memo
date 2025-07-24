@@ -4,6 +4,7 @@ export { default as Icon } from './Icon';
 export { default as Input } from './Input';
 export { default as LazyImage } from './LazyImage';
 export { default as Modal } from './Modal';
+export { default as FullscreenImageViewer } from './FullscreenImageViewer';
 export { default as PerformanceMonitor } from './PerformanceMonitor';
 export { default as BottomTabBar } from './BottomTabBar';
 

@@ -4,6 +4,14 @@ import {
   safeJsonStringify
 } from './localStorageService';
 import { 
+  createDocument,
+  updateDocument,
+  deleteDocument,
+  uploadFile,
+  deleteFile,
+  COLLECTIONS
+} from './firebaseService';
+import { 
   SyncStatus, 
   SyncProgress, 
   SyncState, 
@@ -390,32 +398,28 @@ class SyncService {
 
   // 생성 작업 처리
   private async handleCreate(item: SyncItem): Promise<void> {
-    // const collectionName = this.getCollectionName(item.dataType);
-    // await createDocument(collectionName, item.data as any);
-    console.log('생성 작업:', item);
+    const collectionName = this.getCollectionName(item.dataType);
+    await createDocument(collectionName, item.data as any);
   }
 
   // 수정 작업 처리
   private async handleUpdate(item: SyncItem): Promise<void> {
-    // const collectionName = this.getCollectionName(item.dataType);
-    // await updateDocument(collectionName, item.dataId, item.data as any);
-    console.log('수정 작업:', item);
+    const collectionName = this.getCollectionName(item.dataType);
+    await updateDocument(collectionName, item.dataId, item.data as any);
   }
 
   // 삭제 작업 처리
   private async handleDelete(item: SyncItem): Promise<void> {
-    // const collectionName = this.getCollectionName(item.dataType);
-    // await deleteDocument(collectionName, item.dataId);
-    console.log('삭제 작업:', item);
+    const collectionName = this.getCollectionName(item.dataType);
+    await deleteDocument(collectionName, item.dataId);
   }
 
   // 업로드 작업 처리
   private async handleUpload(item: SyncItem): Promise<void> {
-    // if (item.data instanceof File) {
-    //   const path = `${item.dataType}s`;
-    //   await uploadFile(item.data, path);
-    // }
-    console.log('업로드 작업:', item);
+    if (item.data instanceof File) {
+      const path = `${item.dataType}s`;
+      await uploadFile(item.data, path);
+    }
   }
 
   // 다운로드 작업 처리
@@ -428,11 +432,11 @@ class SyncService {
   private getCollectionName(dataType: string): string {
     switch (dataType) {
       case 'memo':
-        return 'memos';
+        return COLLECTIONS.MEMOS;
       case 'template':
-        return 'templates';
+        return COLLECTIONS.TEMPLATES;
       case 'image':
-        return 'images';
+        return COLLECTIONS.IMAGES;
       default:
         throw new Error(`지원하지 않는 데이터 타입: ${dataType}`);
     }

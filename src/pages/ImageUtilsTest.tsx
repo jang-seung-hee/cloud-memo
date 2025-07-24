@@ -159,8 +159,8 @@ const ImageUtilsTest: React.FC = () => {
   const handleProcessImage = async (source: 'camera' | 'gallery' | 'capture') => {
     try {
       const result = await processImage(source, {
-        maxWidth: 1200,
-        maxHeight: 800,
+        maxWidth: 1280,
+        maxHeight: 720,
         quality: 0.8
       });
 

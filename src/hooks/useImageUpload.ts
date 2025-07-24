@@ -62,8 +62,8 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
         // 이미지 처리
         const processedImage = await processImage(file, {
           quality: compressionQuality,
-          maxWidth: 1920,
-          maxHeight: 1080
+          maxWidth: 1280,
+          maxHeight: 720
         });
 
         // Image 타입으로 변환
@@ -125,8 +125,8 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
       // 이미지 처리
       const processedImage = await processImage(file, {
         quality: compressionQuality,
-        maxWidth: 1920,
-        maxHeight: 1080
+        maxWidth: 1280,
+        maxHeight: 720
       });
 
       // Image 타입으로 변환

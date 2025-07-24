@@ -59,11 +59,12 @@ const MemoDetailPage: React.FC = () => {
   };
 
   // 메모 삭제
-  const handleDeleteMemo = () => {
+  const handleDeleteMemo = async () => {
     if (!memo) return;
 
     try {
-      if (deleteMemo(memo.id)) {
+      const success = await deleteMemo(memo.id);
+      if (success) {
         setIsDeleted(true);
       }
     } catch (error) {

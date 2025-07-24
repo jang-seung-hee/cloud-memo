@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Modal, Button, Icon } from '../ui';
+import { Modal, Button, Icon, FullscreenImageViewer } from '../ui';
 import { createMemo, updateMemo, getTemplates } from '../../services';
 import { processImage } from '../../utils/imageUtils';
 import type { Memo, MemoCategory } from '../../types/memo';
@@ -27,12 +27,26 @@ const MemoForm: React.FC<MemoFormProps> = ({
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
   const [isProcessingClipboard, setIsProcessingClipboard] = useState(false);
   const [clipboardMessage, setClipboardMessage] = useState<string>('');
+  const [selectedImage, setSelectedImage] = useState<Image | null>(null);
+  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   // 모바일 환경 감지
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+  // 이미지 클릭 핸들러
+  const handleImageClick = (image: Image) => {
+    setSelectedImage(image);
+    setIsImageViewerOpen(true);
+  };
+
+  // 이미지 뷰어 닫기
+  const handleCloseImageViewer = () => {
+    setIsImageViewerOpen(false);
+    setSelectedImage(null);
+  };
 
   // 편집 모드인 경우 기존 데이터 로드
   useEffect(() => {
@@ -65,8 +79,8 @@ const MemoForm: React.FC<MemoFormProps> = ({
             console.log('PC 클립보드에서 이미지 감지:', file.name, file.size, file.type);
             
             const result = await processImage(file, {
-              maxWidth: 1200,
-              maxHeight: 800,
+              maxWidth: 1280,
+              maxHeight: 720,
               quality: 0.8
             });
 
@@ -125,8 +139,8 @@ const MemoForm: React.FC<MemoFormProps> = ({
               console.log('모바일 클립보드에서 이미지 감지:', file.name, file.size, file.type);
               
               const result = await processImage(file, {
-                maxWidth: 1200,
-                maxHeight: 800,
+                maxWidth: 1280,
+                maxHeight: 720,
                 quality: 0.8
               });
 
@@ -187,8 +201,8 @@ const MemoForm: React.FC<MemoFormProps> = ({
       try {
         const file = files[0];
         const result = await processImage(file, {
-          maxWidth: 1200,
-          maxHeight: 800,
+          maxWidth: 1280,
+          maxHeight: 720,
           quality: 0.8
         });
 
@@ -231,8 +245,8 @@ const MemoForm: React.FC<MemoFormProps> = ({
         for (let i = 0; i < files.length; i++) {
           const file = files[i];
           const result = await processImage(file, {
-            maxWidth: 1200,
-            maxHeight: 800,
+            maxWidth: 1280,
+            maxHeight: 720,
             quality: 0.8
           });
 
@@ -381,7 +395,8 @@ const MemoForm: React.FC<MemoFormProps> = ({
       isOpen={true}
       title={memo ? '메모 수정' : '새 메모 작성'}
       onClose={handleCancel}
-      size="2xl"
+      size="full"
+      className="sm:max-w-4xl sm:mx-auto"
     >
       {/* 숨겨진 파일 입력들 */}
       <input
@@ -504,11 +519,15 @@ const MemoForm: React.FC<MemoFormProps> = ({
                   <img
                     src={image.thumbnail || image.data}
                     alt={image.name}
-                    className="w-full h-20 object-cover rounded border border-gray-200 dark:border-dark-border"
+                    className="w-full h-20 object-cover rounded border border-gray-200 dark:border-dark-border cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={() => handleImageClick(image)}
                   />
                   <button
-                    onClick={() => setImages(prev => prev.filter((_, i) => i !== index))}
-                    className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setImages(prev => prev.filter((_, i) => i !== index));
+                    }}
+                    className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 z-10"
                   >
                     ×
                   </button>
@@ -611,8 +630,15 @@ const MemoForm: React.FC<MemoFormProps> = ({
             </div>
           </div>
         </>
-    </Modal>
-  );
-};
+
+        {/* 전체화면 이미지 뷰어 */}
+        <FullscreenImageViewer
+          image={selectedImage}
+          isOpen={isImageViewerOpen}
+          onClose={handleCloseImageViewer}
+        />
+      </Modal>
+    );
+  };
 
 export default MemoForm; 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal } from '../ui';
+import { Modal, FullscreenImageViewer } from '../ui';
 import type { Memo } from '../../types/memo';
 
 interface MemoDetailProps {
@@ -19,8 +19,8 @@ const MemoDetail: React.FC<MemoDetailProps> = ({
   onClose,
   className = ''
 }) => {
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<import('../../types/image').Image | null>(null);
+  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
 
   // 날짜 포맷팅
   const formatDate = (date: Date | string) => {
@@ -49,14 +49,14 @@ const MemoDetail: React.FC<MemoDetailProps> = ({
   };
 
   // 이미지 클릭 처리
-  const handleImageClick = (imageData: string) => {
-    setSelectedImage(imageData);
-    setIsImageModalOpen(true);
+  const handleImageClick = (image: import('../../types/image').Image) => {
+    setSelectedImage(image);
+    setIsImageViewerOpen(true);
   };
 
-  // 이미지 모달 닫기
-  const handleImageModalClose = () => {
-    setIsImageModalOpen(false);
+  // 이미지 뷰어 닫기
+  const handleCloseImageViewer = () => {
+    setIsImageViewerOpen(false);
     setSelectedImage(null);
   };
 
@@ -106,7 +106,7 @@ const MemoDetail: React.FC<MemoDetailProps> = ({
               <div
                 key={image.id || index}
                 className="border border-gray-200 dark:border-dark-border rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
-                onClick={() => handleImageClick(image.data)}
+                onClick={() => handleImageClick(image)}
               >
                 <img
                   src={image.data}
@@ -153,23 +153,12 @@ const MemoDetail: React.FC<MemoDetailProps> = ({
         </div>
       </div>
 
-      {/* 이미지 확대 보기 모달 */}
-      <Modal
-        isOpen={isImageModalOpen}
-        title="이미지 보기"
-        onClose={handleImageModalClose}
-        size="xl"
-      >
-        {selectedImage && (
-          <div className="text-center">
-            <img
-              src={selectedImage}
-              alt="확대된 이미지"
-              className="max-w-full max-h-[70vh] object-contain"
-            />
-          </div>
-        )}
-      </Modal>
+      {/* 전체화면 이미지 뷰어 */}
+      <FullscreenImageViewer
+        image={selectedImage}
+        isOpen={isImageViewerOpen}
+        onClose={handleCloseImageViewer}
+      />
     </div>
   );
 };

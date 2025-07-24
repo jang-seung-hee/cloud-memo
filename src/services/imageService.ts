@@ -12,7 +12,10 @@ import {
 } from './localStorageService';
 import { 
   isFirebaseAvailable, 
-  getCurrentUserId
+  getCurrentUserId,
+  uploadFile,
+  deleteFile,
+  COLLECTIONS
 } from './firebaseService';
 import syncService from './syncService';
 import { SyncOperation } from '../types/sync';
@@ -61,25 +64,22 @@ const getImages = (): Image[] => {
 };
 
 // 이미지 저장
-const saveImage = (file: File): Promise<ImageUploadResponse> => {
+const saveImage = async (file: File): Promise<ImageUploadResponse> => {
+  if (!isStorageAvailable()) {
+    throw new StorageError(ERROR_MESSAGES.STORAGE_NOT_AVAILABLE, 'STORAGE_NOT_AVAILABLE');
+  }
+
+  if (file.size > STORAGE_LIMITS.MAX_IMAGE_SIZE) {
+    throw new StorageError(ERROR_MESSAGES.IMAGE_TOO_LARGE, 'IMAGE_TOO_LARGE');
+  }
+
+  if (!file.type.startsWith('image/')) {
+    throw new StorageError('이미지 파일만 업로드 가능합니다.', 'INVALID_FILE_TYPE');
+  }
+
   return new Promise((resolve, reject) => {
-    if (!isStorageAvailable()) {
-      reject(new StorageError(ERROR_MESSAGES.STORAGE_NOT_AVAILABLE, 'STORAGE_NOT_AVAILABLE'));
-      return;
-    }
-
-    if (file.size > STORAGE_LIMITS.MAX_IMAGE_SIZE) {
-      reject(new StorageError(ERROR_MESSAGES.IMAGE_TOO_LARGE, 'IMAGE_TOO_LARGE'));
-      return;
-    }
-
-    if (!file.type.startsWith('image/')) {
-      reject(new StorageError('이미지 파일만 업로드 가능합니다.', 'INVALID_FILE_TYPE'));
-      return;
-    }
-
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       try {
         const base64Data = reader.result as string;
         const dataSize = getBase64Size(base64Data);
@@ -120,12 +120,8 @@ const saveImage = (file: File): Promise<ImageUploadResponse> => {
         // Firebase Storage 동기화 (인증된 사용자인 경우)
         if (isFirebaseAvailable() && getCurrentUserId()) {
           try {
-            syncService.addSyncOperation(
-              SyncOperation.UPLOAD,
-              'image',
-              newImage.id,
-              file
-            );
+            // Firebase Storage에 직접 업로드
+            await uploadFile(file, 'images');
           } catch (syncError) {
             console.warn('Firebase Storage 동기화 실패 (이미지 업로드):', syncError);
             // 동기화 실패해도 로컬 저장은 성공으로 처리

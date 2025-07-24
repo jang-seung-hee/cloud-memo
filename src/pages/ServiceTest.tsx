@@ -15,8 +15,11 @@ import {
   getTemplateStats,
   StorageError
 } from '../services';
+import { isFirebaseAvailable, getCurrentUserId } from '../services/firebaseService';
+import { useAuthContext } from '../contexts/AuthContext';
 
 const ServiceTest: React.FC = () => {
+  const { state: authState } = useAuthContext();
   const [memos, setMemos] = useState<any[]>([]);
   const [images, setImages] = useState<any[]>([]);
   const [templates, setTemplates] = useState<any[]>([]);
@@ -47,14 +50,14 @@ const ServiceTest: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleCreateMemo = () => {
+  const handleCreateMemo = async () => {
     try {
       if (!memoContent.trim()) {
         alert('내용을 입력해주세요.');
         return;
       }
 
-      const newMemo = createMemo({
+      const newMemo = await createMemo({
         title: memoTitle.trim() || undefined, // 제목이 없으면 undefined
         content: memoContent,
         category: '임시'
@@ -73,9 +76,10 @@ const ServiceTest: React.FC = () => {
     }
   };
 
-  const handleDeleteMemo = (id: string) => {
+  const handleDeleteMemo = async (id: string) => {
     try {
-      if (deleteMemo(id)) {
+      const result = await deleteMemo(id);
+      if (result) {
         setMemos(getMemos());
         showModal('메모 삭제 성공!');
       } else {
@@ -125,14 +129,14 @@ const ServiceTest: React.FC = () => {
     }
   };
 
-  const handleCreateTemplate = () => {
+  const handleCreateTemplate = async () => {
     try {
       if (!templateTitle.trim() || !templateContent.trim() || !templateCategory.trim()) {
         alert('제목, 내용, 카테고리를 입력해주세요.');
         return;
       }
 
-      const newTemplate = createTemplate({
+      const newTemplate = await createTemplate({
         title: templateTitle,
         content: templateContent,
         category: templateCategory
@@ -200,6 +204,27 @@ const ServiceTest: React.FC = () => {
     }
   };
 
+  const checkFirebaseStatus = () => {
+    const firebaseAvailable = isFirebaseAvailable();
+    const currentUserId = getCurrentUserId();
+    const isAuthenticated = !!authState.user;
+
+    const statusText = `
+Firebase 연결 상태:
+- Firebase 사용 가능: ${firebaseAvailable ? '✅' : '❌'}
+- 인증 상태: ${isAuthenticated ? '✅ 로그인됨' : '❌ 로그인 필요'}
+- 현재 사용자 ID: ${currentUserId || '없음'}
+- 사용자 정보: ${authState.user ? `${authState.user.displayName} (${authState.user.email})` : '없음'}
+
+환경변수 확인:
+- API Key: ${process.env.REACT_APP_FIREBASE_API_KEY ? '✅ 설정됨' : '❌ 없음'}
+- Project ID: ${process.env.REACT_APP_FIREBASE_PROJECT_ID ? '✅ 설정됨' : '❌ 없음'}
+- Storage Bucket: ${process.env.REACT_APP_FIREBASE_STORAGE_BUCKET ? '✅ 설정됨' : '❌ 없음'}
+    `;
+
+    showModal(statusText);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-secondary-start to-secondary-end p-4 sm:p-6 lg:p-8">
       <div className="max-w-6xl mx-auto">
@@ -207,11 +232,15 @@ const ServiceTest: React.FC = () => {
           로컬스토리지 서비스 테스트
         </h1>
 
-        {/* 통계 버튼 */}
-        <div className="mb-8 text-center">
+        {/* 상태 확인 버튼들 */}
+        <div className="mb-8 text-center space-x-4">
           <Button onClick={showStats} variant="primary">
             <Icon name="Info" size={16} />
             통계 보기
+          </Button>
+          <Button onClick={checkFirebaseStatus} variant="outline">
+            <Icon name="Settings" size={16} />
+            Firebase 상태 확인
           </Button>
         </div>
 

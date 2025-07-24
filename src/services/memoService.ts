@@ -18,7 +18,11 @@ import {
 } from './localStorageService';
 import { 
   isFirebaseAvailable, 
-  getCurrentUserId
+  getCurrentUserId,
+  createDocument,
+  updateDocument,
+  deleteDocument,
+  COLLECTIONS
 } from './firebaseService';
 import syncService from './syncService';
 import { SyncOperation } from '../types/sync';
@@ -85,7 +89,7 @@ const getMemos = (): Memo[] => {
 };
 
 // 메모 생성
-const createMemo = (request: CreateMemoRequest): Memo => {
+const createMemo = async (request: CreateMemoRequest): Promise<Memo> => {
   if (!isStorageAvailable()) {
     throw new StorageError(ERROR_MESSAGES.STORAGE_NOT_AVAILABLE, 'STORAGE_NOT_AVAILABLE');
   }
@@ -124,12 +128,8 @@ const createMemo = (request: CreateMemoRequest): Memo => {
     // Firebase 동기화 (인증된 사용자인 경우)
     if (isFirebaseAvailable() && getCurrentUserId()) {
       try {
-        syncService.addSyncOperation(
-          SyncOperation.CREATE,
-          'memo',
-          newMemo.id,
-          newMemo
-        );
+        // Firebase에 직접 저장
+        await createDocument(COLLECTIONS.MEMOS, newMemo);
       } catch (syncError) {
         console.warn('Firebase 동기화 실패 (메모 생성):', syncError);
         // 동기화 실패해도 로컬 저장은 성공으로 처리
@@ -157,7 +157,7 @@ const getMemo = (id: string): Memo | null => {
 };
 
 // 메모 수정
-const updateMemo = (id: string, request: UpdateMemoRequest): Memo => {
+const updateMemo = async (id: string, request: UpdateMemoRequest): Promise<Memo> => {
   if (!isStorageAvailable()) {
     throw new StorageError(ERROR_MESSAGES.STORAGE_NOT_AVAILABLE, 'STORAGE_NOT_AVAILABLE');
   }
@@ -216,12 +216,8 @@ const updateMemo = (id: string, request: UpdateMemoRequest): Memo => {
     // Firebase 동기화 (인증된 사용자인 경우)
     if (isFirebaseAvailable() && getCurrentUserId()) {
       try {
-        syncService.addSyncOperation(
-          SyncOperation.UPDATE,
-          'memo',
-          updatedMemo.id,
-          updatedMemo
-        );
+        // Firebase에 직접 업데이트
+        await updateDocument(COLLECTIONS.MEMOS, updatedMemo.id, updatedMemo);
       } catch (syncError) {
         console.warn('Firebase 동기화 실패 (메모 수정):', syncError);
         // 동기화 실패해도 로컬 저장은 성공으로 처리
@@ -235,7 +231,7 @@ const updateMemo = (id: string, request: UpdateMemoRequest): Memo => {
 };
 
 // 메모 삭제
-const deleteMemo = (id: string): boolean => {
+const deleteMemo = async (id: string): Promise<boolean> => {
   if (!isStorageAvailable()) {
     throw new StorageError(ERROR_MESSAGES.STORAGE_NOT_AVAILABLE, 'STORAGE_NOT_AVAILABLE');
   }
@@ -257,12 +253,8 @@ const deleteMemo = (id: string): boolean => {
     // Firebase 동기화 (인증된 사용자인 경우)
     if (isFirebaseAvailable() && getCurrentUserId()) {
       try {
-        syncService.addSyncOperation(
-          SyncOperation.DELETE,
-          'memo',
-          id,
-          { id }
-        );
+        // Firebase에서 직접 삭제
+        await deleteDocument(COLLECTIONS.MEMOS, id);
       } catch (syncError) {
         console.warn('Firebase 동기화 실패 (메모 삭제):', syncError);
         // 동기화 실패해도 로컬 삭제는 성공으로 처리

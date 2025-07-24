@@ -35,8 +35,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         try {
           // 이미지 처리 (압축, 썸네일 생성)
           const result = await processImage('gallery', {
-            maxWidth: 1200,
-            maxHeight: 800,
+            maxWidth: 1280,
+            maxHeight: 720,
             quality: 0.8
           });
 
@@ -80,8 +80,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       setUploadProgress(50);
 
       const result = await processImage('capture', {
-        maxWidth: 1200,
-        maxHeight: 800,
+        maxWidth: 1280,
+        maxHeight: 720,
         quality: 0.8
       });
 

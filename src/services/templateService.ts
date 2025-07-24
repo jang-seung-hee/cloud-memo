@@ -12,7 +12,11 @@ import {
 } from './localStorageService';
 import { 
   isFirebaseAvailable, 
-  getCurrentUserId
+  getCurrentUserId,
+  createDocument,
+  updateDocument,
+  deleteDocument,
+  COLLECTIONS
 } from './firebaseService';
 import syncService from './syncService';
 import { SyncOperation } from '../types/sync';
@@ -55,7 +59,7 @@ const getTemplates = (): Template[] => {
 };
 
 // 상용구 생성
-const createTemplate = (request: CreateTemplateRequest): Template => {
+const createTemplate = async (request: CreateTemplateRequest): Promise<Template> => {
   if (!isStorageAvailable()) {
     throw new StorageError(ERROR_MESSAGES.STORAGE_NOT_AVAILABLE, 'STORAGE_NOT_AVAILABLE');
   }
@@ -91,12 +95,8 @@ const createTemplate = (request: CreateTemplateRequest): Template => {
     // Firebase 동기화 (인증된 사용자인 경우)
     if (isFirebaseAvailable() && getCurrentUserId()) {
       try {
-        syncService.addSyncOperation(
-          SyncOperation.CREATE,
-          'template',
-          newTemplate.id,
-          newTemplate
-        );
+        // Firebase에 직접 저장
+        await createDocument(COLLECTIONS.TEMPLATES, newTemplate);
       } catch (syncError) {
         console.warn('Firebase 동기화 실패 (상용구 생성):', syncError);
         // 동기화 실패해도 로컬 저장은 성공으로 처리

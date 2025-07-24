@@ -28,6 +28,7 @@ import ImageAttachmentTest from './pages/ImageAttachmentTest';
 import TemplateManagementTest from './pages/TemplateManagementTest';
 import PerformanceTest from './pages/PerformanceTest';
 import ClipboardTest from './pages/ClipboardTest';
+import FirebaseTest from './pages/FirebaseTest';
 
 // 레이아웃 컴포넌트
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -82,6 +83,7 @@ function App() {
                 <Route path="/template-management-test" element={<TemplateManagementTest />} />
                 <Route path="/performance-test" element={<PerformanceTest />} />
                 <Route path="/clipboard-test" element={<ClipboardTest />} />
+                <Route path="/firebase-test" element={<FirebaseTest />} />
               </Routes>
               </div>
             </TemplateProvider>

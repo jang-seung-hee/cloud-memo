@@ -65,9 +65,10 @@ const HomePage: React.FC = () => {
   };
 
   // 메모 삭제
-  const handleDeleteMemo = (memoId: string) => {
+  const handleDeleteMemo = async (memoId: string) => {
     try {
-      if (deleteMemo(memoId)) {
+      const success = await deleteMemo(memoId);
+      if (success) {
         loadMemos(); // 목록 새로고침
       }
     } catch (error) {
