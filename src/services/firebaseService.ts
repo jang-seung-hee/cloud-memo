@@ -11,7 +11,9 @@ import {
   orderBy, 
   limit,
   serverTimestamp,
-  Timestamp 
+  Timestamp,
+  onSnapshot,
+  Unsubscribe
 } from 'firebase/firestore';
 import { 
   ref, 
@@ -95,6 +97,42 @@ const convertTimestampToDate = (timestamp: Timestamp | Date | string): Date => {
 
 const convertDateToTimestamp = (date: Date): Timestamp => {
   return Timestamp.fromDate(date);
+};
+
+// 네트워크 상태 감지
+const isOnline = (): boolean => {
+  return navigator.onLine;
+};
+
+// 네트워크 상태 변경 리스너
+const addNetworkStatusListener = (callback: (isOnline: boolean) => void): (() => void) => {
+  const handleOnline = () => callback(true);
+  const handleOffline = () => callback(false);
+  
+  window.addEventListener('online', handleOnline);
+  window.addEventListener('offline', handleOffline);
+  
+  return () => {
+    window.removeEventListener('online', handleOnline);
+    window.removeEventListener('offline', handleOffline);
+  };
+};
+
+// Firebase 연결 상태 확인
+const checkFirebaseConnection = async (): Promise<boolean> => {
+  if (!isFirebaseAvailable()) {
+    return false;
+  }
+  
+  try {
+    // 간단한 쿼리로 연결 상태 확인
+    const testQuery = query(collection(db, 'test'), limit(1));
+    await getDocs(testQuery);
+    return true;
+  } catch (error) {
+    console.warn('Firebase 연결 확인 실패:', error);
+    return false;
+  }
 };
 
 // Firestore CRUD 기본 함수들
@@ -386,6 +424,95 @@ const getFileDownloadURL = async (path: string): Promise<string> => {
   }
 };
 
+// Firebase 실시간 리스너 함수들
+const subscribeToCollection = <T>(
+  collectionName: string,
+  callback: (data: T[]) => void,
+  options?: {
+    userId?: string;
+    orderByField?: string;
+    orderDirection?: 'asc' | 'desc';
+    limitCount?: number;
+  }
+): Unsubscribe => {
+  if (!isFirebaseAvailable()) {
+    console.error('Firebase 사용 불가');
+    return () => {};
+  }
+
+  try {
+    const userId = options?.userId || getCurrentUserId();
+    if (!userId) {
+      console.error('사용자 ID 없음');
+      return () => {};
+    }
+
+    let q = query(
+      collection(db, collectionName),
+      where('userId', '==', userId)
+    );
+
+    if (options?.orderByField) {
+      q = query(q, orderBy(options.orderByField, options.orderDirection || 'desc'));
+    }
+
+    if (options?.limitCount) {
+      q = query(q, limit(options.limitCount));
+    }
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const documents: T[] = [];
+      snapshot.forEach((doc) => {
+        documents.push({
+          id: doc.id,
+          ...doc.data()
+        } as T);
+      });
+      callback(documents);
+    }, (error) => {
+      console.error('실시간 리스너 오류:', error);
+    });
+
+    return unsubscribe;
+  } catch (error) {
+    console.error('실시간 리스너 설정 실패:', error);
+    return () => {};
+  }
+};
+
+const subscribeToDocument = <T>(
+  collectionName: string,
+  documentId: string,
+  callback: (data: T | null) => void
+): Unsubscribe => {
+  if (!isFirebaseAvailable()) {
+    console.error('Firebase 사용 불가');
+    return () => {};
+  }
+
+  try {
+    const docRef = doc(db, collectionName, documentId);
+    const unsubscribe = onSnapshot(docRef, (doc) => {
+      if (doc.exists()) {
+        const data = {
+          id: doc.id,
+          ...doc.data()
+        } as T;
+        callback(data);
+      } else {
+        callback(null);
+      }
+    }, (error) => {
+      console.error('문서 실시간 리스너 오류:', error);
+    });
+
+    return unsubscribe;
+  } catch (error) {
+    console.error('문서 실시간 리스너 설정 실패:', error);
+    return () => {};
+  }
+};
+
 export {
   COLLECTIONS,
   FIREBASE_ERROR_MESSAGES,
@@ -402,5 +529,10 @@ export {
   getDocuments,
   uploadFile,
   deleteFile,
-  getFileDownloadURL
+  getFileDownloadURL,
+  subscribeToCollection,
+  subscribeToDocument,
+  isOnline,
+  addNetworkStatusListener,
+  checkFirebaseConnection
 }; 

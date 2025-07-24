@@ -17,58 +17,42 @@ export function useLocalStorage<T>(
     deserializer = JSON.parse
   } = options || {};
 
-  // 초기값 로드
+  // 메모리 기반 상태 관리 (로컬스토리지 비활성화)
   const [storedValue, setStoredValue] = useState<T>(() => {
-    try {
-      const item = window.localStorage.getItem(key);
-      return item ? deserializer(item) : defaultValue;
-    } catch (error) {
-      console.error(`Error reading localStorage key "${key}":`, error);
-      return defaultValue;
-    }
+    console.log(`메모리 기반 상태 관리 사용: ${key}`);
+    return defaultValue;
   });
 
-  // 로컬스토리지에 값 저장
+  // 값 설정 (메모리만)
   const setValue = useCallback((value: T | ((prev: T) => T)) => {
     try {
       const valueToStore = value instanceof Function ? value(storedValue) : value;
       setStoredValue(valueToStore);
-      window.localStorage.setItem(key, serializer(valueToStore));
+      console.log(`메모리 상태 업데이트: ${key}`, valueToStore);
     } catch (error) {
-      console.error(`Error setting localStorage key "${key}":`, error);
+      console.error(`Error setting memory state for key "${key}":`, error);
     }
-  }, [key, serializer, storedValue]);
+  }, [key, storedValue]);
 
-  // 로컬스토리지에서 값 제거
+  // 값 제거 (메모리만)
   const removeValue = useCallback(() => {
     try {
       setStoredValue(defaultValue);
-      window.localStorage.removeItem(key);
+      console.log(`메모리 상태 초기화: ${key}`);
     } catch (error) {
-      console.error(`Error removing localStorage key "${key}":`, error);
+      console.error(`Error resetting memory state for key "${key}":`, error);
     }
   }, [key, defaultValue]);
 
-  // 다른 탭에서의 변경사항 감지
+  // 다른 탭에서의 변경사항 감지 비활성화
   useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === key && e.newValue !== null) {
-        try {
-          setStoredValue(deserializer(e.newValue));
-        } catch (error) {
-          console.error(`Error parsing localStorage key "${key}":`, error);
-        }
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, [key, deserializer]);
+    console.log(`메모리 기반 상태 관리 활성화: ${key}`);
+  }, [key]);
 
   return [storedValue, setValue, removeValue];
 }
 
-// 배열 형태의 로컬스토리지 훅
+// 배열 형태의 메모리 상태 훅
 export function useLocalStorageArray<T>(
   key: string,
   defaultValue: T[] = []
@@ -76,7 +60,7 @@ export function useLocalStorageArray<T>(
   return useLocalStorage<T[]>(key, defaultValue);
 }
 
-// 객체 형태의 로컬스토리지 훅
+// 객체 형태의 메모리 상태 훅
 export function useLocalStorageObject<T extends Record<string, any>>(
   key: string,
   defaultValue: T
@@ -84,7 +68,7 @@ export function useLocalStorageObject<T extends Record<string, any>>(
   return useLocalStorage<T>(key, defaultValue);
 }
 
-// 문자열 형태의 로컬스토리지 훅
+// 문자열 형태의 메모리 상태 훅
 export function useLocalStorageString(
   key: string,
   defaultValue: string = ''
@@ -95,7 +79,7 @@ export function useLocalStorageString(
   });
 }
 
-// 숫자 형태의 로컬스토리지 훅
+// 숫자 형태의 메모리 상태 훅
 export function useLocalStorageNumber(
   key: string,
   defaultValue: number = 0
@@ -106,7 +90,7 @@ export function useLocalStorageNumber(
   });
 }
 
-// 불린 형태의 로컬스토리지 훅
+// 불린 형태의 메모리 상태 훅
 export function useLocalStorageBoolean(
   key: string,
   defaultValue: boolean = false

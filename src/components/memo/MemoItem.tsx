@@ -60,10 +60,39 @@ const MemoItem: React.FC<MemoItemProps> = memo(({
     }
   }, [shouldShowMoreButton, expandedContent, navigate, memo.id]);
 
+  // 안전한 날짜 변환 함수
+  const safeDateConversion = (date: any): Date => {
+    try {
+      if (date instanceof Date) {
+        return date;
+      } else if (typeof date === 'string') {
+        return new Date(date);
+      } else if (date && typeof date === 'object' && date.toDate) {
+        // Firebase Timestamp 객체인 경우
+        return date.toDate();
+      } else if (date && typeof date === 'object' && date.seconds) {
+        // Firebase Timestamp 객체인 경우 (seconds, nanoseconds)
+        return new Date(date.seconds * 1000);
+      } else {
+        // 기타 경우 문자열로 변환 후 Date 객체 생성
+        return new Date(String(date));
+      }
+    } catch (error) {
+      console.error('날짜 변환 오류:', error, date);
+      return new Date(); // 기본값으로 현재 시간 반환
+    }
+  };
+
   // 메모이제이션된 값들
   const formattedDate = useMemo(() => {
     const now = new Date();
-    const memoDate = new Date(memo.updatedAt);
+    const memoDate = safeDateConversion(memo.updatedAt);
+    
+    // 유효한 날짜인지 확인
+    if (isNaN(memoDate.getTime())) {
+      return '날짜 정보 없음';
+    }
+    
     const diffTime = Math.abs(now.getTime() - memoDate.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 

@@ -32,8 +32,8 @@ const generateId = (): string => {
 const isStorageAvailable = (): boolean => {
   try {
     const test = '__storage_test__';
-    localStorage.setItem(test, test);
-    localStorage.removeItem(test);
+    // localStorage.setItem(test, test);
+    // localStorage.removeItem(test);
     return true;
   } catch {
     return false;
@@ -42,13 +42,14 @@ const isStorageAvailable = (): boolean => {
 
 const getStorageSize = (): number => {
   let total = 0;
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key) {
-      total += localStorage.getItem(key)?.length || 0;
-    }
-  }
-  return total;
+  // for (let i = 0; i < localStorage.length; i++) {
+  //   const key = localStorage.key(i);
+  //   if (key) {
+  //     total += localStorage.getItem(key)?.length || 0;
+  //   }
+  // }
+  console.log('로컬스토리지 사용하지 않음, 크기 0 반환');
+  return 0;
 };
 
 const validateStorageLimit = (dataSize: number): boolean => {

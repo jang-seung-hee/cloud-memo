@@ -41,13 +41,15 @@ const getTemplates = (): Template[] => {
   }
 
   try {
-    const templatesJson = localStorage.getItem(STORAGE_KEYS.TEMPLATES);
-    if (!templatesJson) {
-      return [];
-    }
+    // const templatesJson = localStorage.getItem(STORAGE_KEYS.TEMPLATES);
+    // if (!templatesJson) {
+    //   return [];
+    // }
 
-    const templates = safeJsonParse<Template[]>(templatesJson, []);
-    return Array.isArray(templates) ? templates : [];
+    // const templates = safeJsonParse<Template[]>(templatesJson, []);
+    // return Array.isArray(templates) ? templates : [];
+    console.log('로컬스토리지 사용하지 않음, 빈 배열 반환');
+    return [];
   } catch (error) {
     console.error('상용구 목록 가져오기 실패:', error);
     return [];
@@ -85,7 +87,7 @@ const createTemplate = async (request: CreateTemplateRequest): Promise<Template>
     templates.push(newTemplate);
     const templatesJson = safeJsonStringify(templates);
     if (templatesJson) {
-      localStorage.setItem(STORAGE_KEYS.TEMPLATES, templatesJson);
+      // localStorage.setItem(STORAGE_KEYS.TEMPLATES, templatesJson);
     }
 
     // Firebase 동기화 (인증된 사용자인 경우)
@@ -146,7 +148,7 @@ const updateTemplate = (id: string, request: UpdateTemplateRequest): Template =>
     templates[templateIndex] = updatedTemplate;
     const templatesJson = safeJsonStringify(templates);
     if (templatesJson) {
-      localStorage.setItem(STORAGE_KEYS.TEMPLATES, templatesJson);
+      // localStorage.setItem(STORAGE_KEYS.TEMPLATES, templatesJson);
     }
     return updatedTemplate;
   } catch (error) {
@@ -171,7 +173,7 @@ const deleteTemplate = (id: string): boolean => {
     templates.splice(templateIndex, 1);
     const templatesJson = safeJsonStringify(templates);
     if (templatesJson) {
-      localStorage.setItem(STORAGE_KEYS.TEMPLATES, templatesJson);
+      // localStorage.setItem(STORAGE_KEYS.TEMPLATES, templatesJson);
     }
     return true;
   } catch (error) {
@@ -199,7 +201,7 @@ const incrementUsageCount = (id: string): void => {
 
     const templatesJson = safeJsonStringify(templates);
     if (templatesJson) {
-      localStorage.setItem(STORAGE_KEYS.TEMPLATES, templatesJson);
+      // localStorage.setItem(STORAGE_KEYS.TEMPLATES, templatesJson);
     }
   } catch (error) {
     throw new StorageError(ERROR_MESSAGES.QUOTA_EXCEEDED, 'QUOTA_EXCEEDED');
@@ -336,7 +338,7 @@ const importTemplates = (jsonData: string): number => {
 
     const templatesJson = safeJsonStringify(validTemplates);
     if (templatesJson) {
-      localStorage.setItem(STORAGE_KEYS.TEMPLATES, templatesJson);
+      // localStorage.setItem(STORAGE_KEYS.TEMPLATES, templatesJson);
     }
 
     return validTemplates.length;

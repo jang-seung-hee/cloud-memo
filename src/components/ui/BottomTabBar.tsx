@@ -21,7 +21,7 @@ const BottomTabBar: React.FC<BottomTabBarProps> = ({
   className = ''
 }) => {
   return (
-    <div className={`fixed bottom-0 left-0 right-0 bg-white dark:bg-dark-card border-t border-gray-200 dark:border-dark-border shadow-lg dark:shadow-dark z-50 ${className}`}>
+    <div className={`fixed bottom-0 left-0 right-0 bg-white dark:bg-dark-card border-t border-gray-200 dark:border-dark-border shadow-lg dark:shadow-dark z-40 ${className}`}>
       <div className="flex items-center justify-around">
         {tabs.map((tab) => (
           <button

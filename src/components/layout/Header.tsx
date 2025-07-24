@@ -72,21 +72,21 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
 
             {/* 액션 버튼들 */}
             <div className="hidden md:flex items-center space-x-4">
-              {/* 상용구 관리 버튼 */}
-              <Button
-                onClick={() => navigate('/templates')}
-                variant="outline"
-                size="sm"
-                className="flex items-center bg-white border-blue-300 text-blue-700 hover:bg-blue-50"
-              >
-                <Icon name="Copy" size={16} />
-                <span className="ml-2">상용구관리</span>
-              </Button>
-              {/* 동기화 상태 표시 */}
-              <SyncStatus size="sm" showProgress={false} />
               {/* 로그인 상태 표시 */}
               <UserProfile size="sm" showEmail={false} />
-              <LoginButton variant="outline" size="sm" />
+              {/* 로그아웃 및 상용구 관리 버튼을 나란히 배치 */}
+              <div className="flex items-center space-x-2">
+                <LoginButton variant="outline" size="sm" />
+                <Button
+                  onClick={() => navigate('/templates')}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center bg-white border-blue-300 text-blue-700 hover:bg-blue-50"
+                >
+                  <Icon name="Copy" size={16} />
+                  <span className="ml-2">상용구관리</span>
+                </Button>
+              </div>
             </div>
 
             {/* 모바일 메뉴 버튼 */}
@@ -106,8 +106,12 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
           {isMenuOpen && (
             <div className="md:hidden">
               <div className="px-2 pt-2 pb-3 space-y-1 bg-white dark:bg-dark-card border-t border-gray-200 dark:border-dark-border">
-                {/* 상용구 관리 버튼 */}
+                {/* 로그인 상태 표시 */}
                 <div className="px-3 py-2">
+                  <UserProfile size="md" />
+                </div>
+                {/* 상용구 관리 및 로그아웃 버튼을 한 행에 배치 */}
+                <div className="px-3 py-2 flex space-x-2">
                   <Button
                     onClick={() => {
                       navigate('/templates');
@@ -115,18 +119,12 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
                     }}
                     variant="outline"
                     size="sm"
-                    className="w-full flex items-center justify-center bg-white border-blue-300 text-blue-700 hover:bg-blue-50"
+                    className="flex-1 flex items-center justify-center bg-white border-blue-300 text-blue-700 hover:bg-blue-50"
                   >
                     <Icon name="Copy" size={16} />
                     <span className="ml-2">상용구관리</span>
                   </Button>
-                </div>
-                {/* 로그인 상태 표시 */}
-                <div className="px-3 py-2">
-                  <UserProfile size="md" />
-                </div>
-                <div className="px-3 py-2">
-                  <LoginButton variant="outline" size="sm" className="w-full" />
+                  <LoginButton variant="outline" size="sm" className="flex-1" />
                 </div>
               </div>
             </div>

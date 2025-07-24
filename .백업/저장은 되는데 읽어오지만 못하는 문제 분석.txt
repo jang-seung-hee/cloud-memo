@@ -1,0 +1,93 @@
+🔍 저장은 되는데 읽어오지만 못하는 문제 분석
+코드를 분석한 결과, 타임스탬프 필드 문제가 원인일 가능성이 높습니다.
+핵심 문제: updatedAt 필드 타입 불일치
+저장 시 (createDocument):
+읽기 시 (getDocuments):
+문제 원인
+저장 시: serverTimestamp()로 Firebase Timestamp 객체 저장
+읽기 시: orderBy('updatedAt')로 정렬 시도
+결과: Firebase Timestamp 필드로 정렬할 때 쿼리 오류 발생 가능
+Firebase 콘솔에서 확인된 데이터
+이미지에서 보인 데이터:
+이는 문자열 형태로 저장되어 있는데, serverTimestamp()는 Timestamp 객체를 생성합니다.
+해결 방법
+방법 1: 정렬 필드 제거 (임시 해결)
+문제를 찾았습니다! orderByField: 'updatedAt' 정렬이 문제입니다.
+문제 원인
+저장 시: serverTimestamp()로 Firebase Timestamp 객체 저장
+읽기 시: orderBy('updatedAt')로 정렬 시도
+결과: Firebase Timestamp 필드로 정렬할 때 쿼리 오류 발생
+
+해결 방법
+정렬 필드를 제거하고 클라이언트에서 정렬하도록 수정:
+
+영구 해결책
+memoService.ts에서 orderByField와 orderDirection 옵션을 제거하고, 클라이언트에서 정렬하도록 수정해야 합니다.
+이렇게 하면 Firebase 쿼리 오류 없이 데이터를 가져올 수 있고, 클라이언트에서 updatedAt 기준으로 정렬할 수 있습니다! 🚀
+
+
+
+Ctrl+K to generate a command
+인증상태가 문제가 있으면 저장도 안되어야지, DB에 저장은 정상적으로 되는데 읽어 오지만 못하고 있어
+
+맞습니다! 저장은 되는데 읽어오지만 못한다면 인증 문제가 아닙니다. 다른 원인을 찾아보겠습니다.
+🔍 저장은 되는데 읽어오지만 못하는 문제 분석
+코드를 분석한 결과, 타임스탬프 필드 문제가 원인일 가능성이 높습니다.
+핵심 문제: updatedAt 필드 타입 불일치
+저장 시 (createDocument):
+읽기 시 (getDocuments):
+문제 원인
+저장 시: serverTimestamp()로 Firebase Timestamp 객체 저장
+읽기 시: orderBy('updatedAt')로 정렬 시도
+결과: Firebase Timestamp 필드로 정렬할 때 쿼리 오류 발생 가능
+Firebase 콘솔에서 확인된 데이터
+이미지에서 보인 데이터:
+이는 문자열 형태로 저장되어 있는데, serverTimestamp()는 Timestamp 객체를 생성합니다.
+해결 방법
+방법 1: 정렬 필드 제거 (임시 해결)
+문제를 찾았습니다! orderByField: 'updatedAt' 정렬이 문제입니다.
+문제 원인
+저장 시: serverTimestamp()로 Firebase Timestamp 객체 저장
+읽기 시: orderBy('updatedAt')로 정렬 시도
+결과: Firebase Timestamp 필드로 정렬할 때 쿼리 오류 발생
+해결 방법
+정렬 필드를 제거하고 클라이언트에서 정렬하도록 수정:
+임시 해결책
+브라우저 개발자 도구 콘솔에서 다음 코드를 실행하여 정렬 없이 데이터를 가져와보세요:
+영구 해결책
+memoService.ts에서 orderByField와 orderDirection 옵션을 제거하고, 클라이언트에서 정렬하도록 수정해야 합니다.
+이렇게 하면 Firebase 쿼리 오류 없이 데이터를 가져올 수 있고, 클라이언트에서 updatedAt 기준으로 정렬할 수 있습니다! 🚀
+영구해결책으로 코드 수정해줘
+
+영구 해결책으로 코드를 수정하겠습니다. Firebase 쿼리에서 정렬을 제거하고 클라이언트에서 정렬하도록 변경하겠습니다.
+이제 모든 orderByField와 orderDirection 옵션을 제거하겠습니다.
+여러 곳에서 같은 패턴이 발견되었습니다. 하나씩 수정하겠습니다.
+이제 createMemo 함수에서도 id 필드를 제거하여 Firebase에 저장할 때 빈 문자열이 저장되지 않도록 수정하겠습니다.
+newMemo 변수를 memoData로 변경했으므로, 이후 코드에서도 이를 수정해야 합니다.
+ID 타입 오류와 나머지 newMemo 참조를 수정하겠습니다.
+이제 나머지 newMemo 참조들을 수정하겠습니다.
+마지막 newMemo 참조들을 수정하겠습니다.
+마지막 return newMemo;를 수정하겠습니다.
+newMemo 변수가 정의되지 않은 상태에서 반환되고 있습니다. 이를 수정하겠습니다.
+✅ 영구 해결책 완료
+수정된 내용
+Firebase 쿼리에서 정렬 제거:
+모든 getDocuments 호출에서 orderByField와 orderDirection 옵션 제거
+Firebase에서 데이터를 가져온 후 클라이언트에서 정렬
+ID 필드 문제 해결:
+Firebase에 저장할 때 id 필드를 제외한 memoData 객체 사용
+Firebase에서 생성된 ID를 받아서 완전한 Memo 객체 생성
+클라이언트 정렬 유지:
+getMemos 함수에서 여전히 updatedAt 기준으로 정렬
+Firebase 쿼리 오류 없이 데이터 가져오기 가능
+수정된 함수들
+getMemos: Firebase 쿼리에서 정렬 제거
+createMemo: ID 필드 제외하고 저장, Firebase ID 사용
+updateMemo: Firebase 쿼리에서 정렬 제거
+deleteMemo: Firebase 쿼리에서 정렬 제거
+결과
+이제 다음과 같이 작동합니다:
+저장: Firebase에 id 필드 없이 저장 (빈 문자열 문제 해결)
+읽기: Firebase에서 정렬 없이 데이터 가져오기 (쿼리 오류 해결)
+정렬: 클라이언트에서 updatedAt 기준으로 정렬 (사용자 경험 유지)
+이제 DB에 저장된 메모가 정상적으로 불러와질 것입니다! 🚀

@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Icon, { IconName } from './Icon';
 import Button from './Button';
-import { useSyncStatus } from '../../hooks/useSyncStatus';
 import { useAuthContext } from '../../contexts/AuthContext';
-import syncService from '../../services/syncService';
+import { isOnline, addNetworkStatusListener, checkFirebaseConnection } from '../../services/firebaseService';
 
 interface SyncStatusProps {
   className?: string;
@@ -19,17 +18,39 @@ const SyncStatus: React.FC<SyncStatusProps> = ({
   size = 'md'
 }) => {
   const { state: authState } = useAuthContext();
-  const { 
-    startManualSync, 
-    retrySync, 
-    toggleAutoSync,
-    isOnline, 
-    isSyncing, 
-    hasError, 
-    progress, 
-    lastSyncTime, 
-    error 
-  } = useSyncStatus();
+  const [networkStatus, setNetworkStatus] = useState(isOnline());
+  const [firebaseStatus, setFirebaseStatus] = useState<boolean | null>(null);
+  const [isCheckingConnection, setIsCheckingConnection] = useState(false);
+
+  // 네트워크 상태 감지
+  useEffect(() => {
+    const unsubscribe = addNetworkStatusListener((isOnline) => {
+      setNetworkStatus(isOnline);
+      if (isOnline) {
+        // 온라인 상태가 되면 Firebase 연결 확인
+        checkFirebaseConnectionStatus();
+      }
+    });
+
+    // 초기 Firebase 연결 상태 확인
+    checkFirebaseConnectionStatus();
+
+    return unsubscribe;
+  }, []);
+
+  // Firebase 연결 상태 확인
+  const checkFirebaseConnectionStatus = async () => {
+    setIsCheckingConnection(true);
+    try {
+      const isConnected = await checkFirebaseConnection();
+      setFirebaseStatus(isConnected);
+    } catch (error) {
+      console.error('Firebase 연결 확인 실패:', error);
+      setFirebaseStatus(false);
+    } finally {
+      setIsCheckingConnection(false);
+    }
+  };
 
   // 로그인하지 않은 경우 표시하지 않음
   if (!authState.user) {
@@ -58,7 +79,7 @@ const SyncStatus: React.FC<SyncStatusProps> = ({
 
   // 상태별 아이콘과 색상
   const getStatusInfo = () => {
-    if (!isOnline) {
+    if (!networkStatus) {
       return {
         icon: 'WifiOff',
         color: 'text-red-500',
@@ -67,30 +88,30 @@ const SyncStatus: React.FC<SyncStatusProps> = ({
       };
     }
 
-    if (isSyncing) {
+    if (isCheckingConnection) {
       return {
         icon: 'Loader2',
         color: 'text-blue-500',
         bgColor: 'bg-blue-50 dark:bg-blue-900/20',
-        text: '동기화 중'
+        text: '연결 확인 중'
       };
     }
 
-    if (hasError) {
+    if (firebaseStatus === false) {
       return {
         icon: 'AlertCircle',
         color: 'text-red-500',
         bgColor: 'bg-red-50 dark:bg-red-900/20',
-        text: '동기화 오류'
+        text: 'Firebase 연결 실패'
       };
     }
 
-    if (lastSyncTime) {
+    if (firebaseStatus === true) {
       return {
         icon: 'CheckCircle',
         color: 'text-green-500',
         bgColor: 'bg-green-50 dark:bg-green-900/20',
-        text: '동기화 완료'
+        text: '연결됨'
       };
     }
 
@@ -98,25 +119,11 @@ const SyncStatus: React.FC<SyncStatusProps> = ({
       icon: 'Cloud',
       color: 'text-gray-500',
       bgColor: 'bg-gray-50 dark:bg-gray-900/20',
-      text: '대기 중'
+      text: '확인 중'
     };
   };
 
   const statusInfo = getStatusInfo();
-
-  // 마지막 동기화 시간 포맷팅
-  const formatLastSyncTime = (date: Date) => {
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / (1000 * 60));
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-    if (minutes < 1) return '방금 전';
-    if (minutes < 60) return `${minutes}분 전`;
-    if (hours < 24) return `${hours}시간 전`;
-    return `${days}일 전`;
-  };
 
   return (
     <div className={`flex items-center space-x-2 ${classes.container} ${className}`}>
@@ -125,96 +132,42 @@ const SyncStatus: React.FC<SyncStatusProps> = ({
         <Icon 
           name={statusInfo.icon as IconName} 
           size={classes.icon} 
-          className={`${statusInfo.color} ${isSyncing ? 'animate-spin' : ''}`} 
+          className={`${statusInfo.color} ${isCheckingConnection ? 'animate-spin' : ''}`} 
         />
         <span className={`font-medium ${statusInfo.color}`}>
           {statusInfo.text}
         </span>
       </div>
 
-      {/* 진행률 표시 */}
-      {showProgress && isSyncing && progress.totalTasks > 0 && (
-        <div className="flex items-center space-x-1">
-          <span className="text-gray-500">
-            {progress.completedTasks}/{progress.totalTasks}
-          </span>
-          <div className="w-16 h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-blue-500 transition-all duration-300"
-              style={{ width: `${progress.percentage}%` }}
-            />
-          </div>
-        </div>
-      )}
-
       {/* 네트워크 상태 */}
       {showNetworkStatus && (
         <div className="flex items-center space-x-1">
           <Icon 
-            name={isOnline ? 'Wifi' : 'WifiOff'} 
+            name={networkStatus ? 'Wifi' : 'WifiOff'} 
             size={classes.icon} 
-            className={isOnline ? 'text-green-500' : 'text-red-500'} 
+            className={networkStatus ? 'text-green-500' : 'text-red-500'} 
           />
-          <span className={`text-xs ${isOnline ? 'text-green-600' : 'text-red-600'}`}>
-            {isOnline ? '온라인' : '오프라인'}
+          <span className={`text-xs ${networkStatus ? 'text-green-600' : 'text-red-600'}`}>
+            {networkStatus ? '온라인' : '오프라인'}
           </span>
         </div>
       )}
 
-      {/* 마지막 동기화 시간 */}
-      {lastSyncTime && !isSyncing && !hasError && (
-        <span className="text-gray-500 text-xs">
-          {formatLastSyncTime(lastSyncTime)}
-        </span>
-      )}
-
-      {/* 액션 버튼들 */}
-      <div className="flex items-center space-x-1">
-        {/* 재시도 버튼 */}
-        {hasError && (
-          <Button
-            variant="ghost"
-            size={classes.button as 'sm' | 'md'}
-            onClick={retrySync}
-            className="p-1"
-          >
-            <Icon name="RefreshCw" size={classes.icon} />
-          </Button>
-        )}
-
-        {/* 수동 동기화 버튼 */}
-        {!isSyncing && isOnline && (
-          <Button
-            variant="ghost"
-            size={classes.button as 'sm' | 'md'}
-            onClick={startManualSync}
-            className="p-1"
-          >
-            <Icon name="RefreshCw" size={classes.icon} />
-          </Button>
-        )}
-
-        {/* 자동 동기화 토글 버튼 */}
-                 <Button
-           variant="ghost"
-           size={classes.button as 'sm' | 'md'}
-           onClick={toggleAutoSync}
-           className="p-1"
-         >
-           <Icon 
-             name={syncService.getConfig().autoSync ? 'Pause' : 'RefreshCw'} 
-             size={classes.icon} 
-           />
-         </Button>
-      </div>
-
-      {/* 오류 메시지 툴팁 */}
-      {hasError && error && (
-        <div className="absolute top-full left-0 mt-1 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md shadow-lg z-10 max-w-xs">
-          <p className="text-red-700 dark:text-red-300 text-xs">
-            {error}
-          </p>
-        </div>
+      {/* 재연결 버튼 */}
+      {(!networkStatus || firebaseStatus === false) && (
+        <Button
+          variant="ghost"
+          size={classes.button as 'sm' | 'md'}
+          onClick={checkFirebaseConnectionStatus}
+          disabled={isCheckingConnection}
+          className="p-1"
+        >
+          <Icon 
+            name={isCheckingConnection ? 'Loader2' : 'RefreshCw'} 
+            size={classes.icon} 
+            className={isCheckingConnection ? 'animate-spin' : ''} 
+          />
+        </Button>
       )}
     </div>
   );

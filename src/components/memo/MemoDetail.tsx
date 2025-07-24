@@ -23,15 +23,41 @@ const MemoDetail: React.FC<MemoDetailProps> = ({
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
 
   // 날짜 포맷팅
-  const formatDate = (date: Date | string) => {
-    const dateObj = typeof date === 'string' ? new Date(date) : date;
-    return dateObj.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  const formatDate = (date: any) => {
+    try {
+      let dateObj: Date;
+      
+      if (date instanceof Date) {
+        dateObj = date;
+      } else if (typeof date === 'string') {
+        dateObj = new Date(date);
+      } else if (date && typeof date === 'object' && date.toDate) {
+        // Firebase Timestamp 객체인 경우
+        dateObj = date.toDate();
+      } else if (date && typeof date === 'object' && date.seconds) {
+        // Firebase Timestamp 객체인 경우 (seconds, nanoseconds)
+        dateObj = new Date(date.seconds * 1000);
+      } else {
+        // 기타 경우 문자열로 변환 후 Date 객체 생성
+        dateObj = new Date(String(date));
+      }
+      
+      // 유효한 날짜인지 확인
+      if (isNaN(dateObj.getTime())) {
+        return '날짜 정보 없음';
+      }
+      
+      return dateObj.toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      console.error('날짜 포맷팅 오류:', error, date);
+      return '날짜 정보 없음';
+    }
   };
 
   // 제목 표시 (제목이 없으면 내용의 첫 줄 사용)
@@ -85,7 +111,7 @@ const MemoDetail: React.FC<MemoDetailProps> = ({
       
       {/* ID 정보 */}
       <div className="text-sm text-gray-500 dark:text-dark-text-muted mb-3">
-                        <div>{new Date(memo.createdAt).toLocaleDateString('ko-KR')}에 작성됨</div>
+                        <div>{formatDate(memo.createdAt)}에 작성됨</div>
       </div>
 
       {/* 내용 */}

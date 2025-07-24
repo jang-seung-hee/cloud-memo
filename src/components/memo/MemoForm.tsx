@@ -445,30 +445,30 @@ const MemoForm: React.FC<MemoFormProps> = ({
           </div>
           
           {/* 미디어 액션 아이콘들 */}
-          <div className="flex space-x-1">
+          <div className="flex space-x-2">
             <button
               type="button"
               onClick={handleCameraCapture}
-              className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+              className="p-2 rounded-full bg-blue-100 hover:bg-blue-200 transition-colors"
               title="카메라로 촬영"
             >
-              <Icon name="Camera" size={14} className="text-gray-600" />
+              <Icon name="Camera" size={18} className="text-blue-600" />
             </button>
             <button
               type="button"
               onClick={handleGallerySelect}
-              className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+              className="p-2 rounded-full bg-green-100 hover:bg-green-200 transition-colors"
               title="갤러리에서 선택"
             >
-              <Icon name="Image" size={14} className="text-gray-600" />
+              <Icon name="Image" size={18} className="text-green-600" />
             </button>
             <button
               type="button"
               onClick={handleOpenTemplateSidebar}
-              className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+              className="p-2 rounded-full bg-purple-100 hover:bg-purple-200 transition-colors"
               title="상용구 선택"
             >
-              <Icon name="FileText" size={14} className="text-gray-600" />
+              <Icon name="FileText" size={18} className="text-purple-600" />
             </button>
           </div>
         </div>

@@ -42,12 +42,12 @@ const Modal: React.FC<ModalProps> = ({
 
     if (isOpen) {
       document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
+      // body overflow를 hidden으로 설정하지 않음 (바텀 탭바가 가려지는 것을 방지)
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      // body overflow를 unset으로 설정하지 않음
     };
   }, [isOpen, onClose]);
 
@@ -76,9 +76,9 @@ const Modal: React.FC<ModalProps> = ({
         onClick={handleBackdropClick}
       />
       
-      {/* 모달 컨테이너 */}
-      <div className="flex min-h-full items-center justify-center p-2 sm:p-4">
-        <div className={`relative bg-white dark:bg-dark-card rounded-lg shadow-xl dark:shadow-dark w-full h-full sm:h-auto flex flex-col ${sizeClasses[size]} ${className}`}>
+      {/* 모달 컨테이너 - 바텀 탭바 위에 위치하도록 조정 */}
+      <div className="flex min-h-full items-center justify-center p-2 sm:p-4 pb-28">
+        <div className={`relative bg-white dark:bg-dark-card rounded-lg shadow-xl dark:shadow-dark w-full h-full sm:h-auto flex flex-col max-h-[calc(100vh-8rem)] ${sizeClasses[size]} ${className}`}>
           {/* 모달 헤더 */}
           {(title || !hideCloseButton) && (
             <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-dark-border flex-shrink-0">

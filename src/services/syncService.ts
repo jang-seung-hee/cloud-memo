@@ -89,7 +89,7 @@ class SyncQueue {
   // 큐 저장
   private saveQueue(): void {
     try {
-      localStorage.setItem(SYNC_QUEUE_KEY, safeJsonStringify(this.queue) || '[]');
+      // localStorage.setItem(SYNC_QUEUE_KEY, safeJsonStringify(this.queue) || '[]');
     } catch (error) {
       console.error('동기화 큐 저장 실패:', error);
     }
@@ -98,8 +98,10 @@ class SyncQueue {
   // 큐 로드
   loadQueue(): void {
     try {
-      const queueData = localStorage.getItem(SYNC_QUEUE_KEY);
-      this.queue = safeJsonParse<SyncItem[]>(queueData || '[]', []);
+      // const queueData = localStorage.getItem(SYNC_QUEUE_KEY);
+      // this.queue = safeJsonParse<SyncItem[]>(queueData || '[]', []);
+      console.log('로컬스토리지 사용하지 않음, 빈 큐로 초기화');
+      this.queue = [];
     } catch (error) {
       console.error('동기화 큐 로드 실패:', error);
       this.queue = [];
@@ -156,7 +158,7 @@ class SyncStateManager {
   // 상태 저장
   private saveState(): void {
     try {
-      localStorage.setItem(SYNC_STATE_KEY, safeJsonStringify(this.state) || '{}');
+      // localStorage.setItem(SYNC_STATE_KEY, safeJsonStringify(this.state) || '{}');
     } catch (error) {
       console.error('동기화 상태 저장 실패:', error);
     }
@@ -165,22 +167,35 @@ class SyncStateManager {
   // 상태 로드
   private loadState(): SyncState {
     try {
-      const stateData = localStorage.getItem(SYNC_STATE_KEY);
-      const savedState = safeJsonParse<SyncState>(stateData || '{}', {
-        status: SyncStatus.IDLE,
-        progress: {
-          currentTask: '',
-          totalTasks: 0,
-          completedTasks: 0,
-          percentage: 0
-        },
-        lastSyncTime: null,
-        error: null,
-        isOnline: navigator.onLine
-      });
+      // const stateData = localStorage.getItem(SYNC_STATE_KEY);
+      // const savedState = safeJsonParse<SyncState>(stateData || '{}', {
+      //   status: SyncStatus.IDLE,
+      //   progress: {
+      //     currentTask: '',
+      //     totalTasks: 0,
+      //     completedTasks: 0,
+      //     percentage: 0
+      //   },
+      //   lastSyncTime: null,
+      //   error: null,
+      //   isOnline: navigator.onLine
+      // });
       
+      // return {
+      //   ...savedState,
+      //   status: SyncStatus.IDLE,
+      //   progress: {
+      //     currentTask: '',
+      //     totalTasks: 0,
+      //     completedTasks: 0,
+      //     percentage: 0
+      //   },
+      //   lastSyncTime: null,
+      //   error: null,
+      //   isOnline: navigator.onLine
+      // };
+      console.log('로컬스토리지 사용하지 않음, 기본 상태로 초기화');
       return {
-        ...savedState,
         status: SyncStatus.IDLE,
         progress: {
           currentTask: '',
@@ -232,7 +247,7 @@ class SyncConfigManager {
   // 설정 저장
   private saveConfig(): void {
     try {
-      localStorage.setItem(SYNC_CONFIG_KEY, safeJsonStringify(this.config) || '{}');
+      // localStorage.setItem(SYNC_CONFIG_KEY, safeJsonStringify(this.config) || '{}');
     } catch (error) {
       console.error('동기화 설정 저장 실패:', error);
     }
@@ -241,10 +256,12 @@ class SyncConfigManager {
   // 설정 로드
   private loadConfig(): SyncConfig {
     try {
-      const configData = localStorage.getItem(SYNC_CONFIG_KEY);
-      const savedConfig = safeJsonParse<SyncConfig>(configData || '{}', DEFAULT_SYNC_CONFIG);
+      // const configData = localStorage.getItem(SYNC_CONFIG_KEY);
+      // const savedConfig = safeJsonParse<SyncConfig>(configData || '{}', DEFAULT_SYNC_CONFIG);
       
-      return { ...DEFAULT_SYNC_CONFIG, ...savedConfig };
+      // return { ...DEFAULT_SYNC_CONFIG, ...savedConfig };
+      console.log('로컬스토리지 사용하지 않음, 기본 설정으로 초기화');
+      return { ...DEFAULT_SYNC_CONFIG };
     } catch (error) {
       console.error('동기화 설정 로드 실패:', error);
       return { ...DEFAULT_SYNC_CONFIG };

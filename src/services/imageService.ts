@@ -46,13 +46,15 @@ const getImages = (): Image[] => {
   }
 
   try {
-    const imagesJson = localStorage.getItem(STORAGE_KEYS.IMAGES);
-    if (!imagesJson) {
-      return [];
-    }
+    // const imagesJson = localStorage.getItem(STORAGE_KEYS.IMAGES);
+    // if (!imagesJson) {
+    //   return [];
+    // }
 
-    const images = safeJsonParse<Image[]>(imagesJson, []);
-    return Array.isArray(images) ? images : [];
+    // const images = safeJsonParse<Image[]>(imagesJson, []);
+    // return Array.isArray(images) ? images : [];
+    console.log('로컬스토리지 사용하지 않음, 빈 배열 반환');
+    return [];
   } catch (error) {
     console.error('이미지 목록 가져오기 실패:', error);
     return [];
@@ -110,7 +112,7 @@ const saveImage = async (file: File): Promise<ImageUploadResponse> => {
         images.push(newImage);
         const imagesJson = safeJsonStringify(images);
         if (imagesJson) {
-          localStorage.setItem(STORAGE_KEYS.IMAGES, imagesJson);
+          // localStorage.setItem(STORAGE_KEYS.IMAGES, imagesJson);
         }
 
         // Firebase Storage 동기화 (인증된 사용자인 경우)
@@ -164,7 +166,7 @@ const deleteImage = (id: string): boolean => {
     images.splice(imageIndex, 1);
     const imagesJson = safeJsonStringify(images);
     if (imagesJson) {
-      localStorage.setItem(STORAGE_KEYS.IMAGES, imagesJson);
+      // localStorage.setItem(STORAGE_KEYS.IMAGES, imagesJson);
     }
     return true;
   } catch (error) {
@@ -229,7 +231,7 @@ const cleanupUnusedImages = (usedImageIds: string[]): number => {
     const remainingImages = images.filter(image => usedIds.has(image.id));
     const imagesJson = safeJsonStringify(remainingImages);
     if (imagesJson) {
-      localStorage.setItem(STORAGE_KEYS.IMAGES, imagesJson);
+      // localStorage.setItem(STORAGE_KEYS.IMAGES, imagesJson);
     }
     return unusedImages.length;
   } catch (error) {
@@ -299,7 +301,7 @@ const importImages = (jsonData: string): number => {
 
     const imagesJson = safeJsonStringify(validImages);
     if (imagesJson) {
-      localStorage.setItem(STORAGE_KEYS.IMAGES, imagesJson);
+      // localStorage.setItem(STORAGE_KEYS.IMAGES, imagesJson);
     }
 
     return validImages.length;

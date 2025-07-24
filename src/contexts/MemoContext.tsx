@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useReducer, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useCallback, ReactNode, useEffect } from 'react';
 import type { Memo } from '../types/memo';
+import { subscribeToCollection } from '../services/firebaseService';
+import { useAuthContext } from './AuthContext';
 
 // 상태 타입 정의
 interface MemoState {
@@ -146,6 +148,33 @@ interface MemoProviderProps {
 
 export function MemoProvider({ children }: MemoProviderProps) {
   const [state, dispatch] = useReducer(memoReducer, initialState);
+  const { state: authState } = useAuthContext();
+
+  // Firebase 실시간 리스너 설정
+  useEffect(() => {
+    if (!authState.user) {
+      return;
+    }
+
+    console.log('Firebase 실시간 리스너 설정 중...');
+    const unsubscribe = subscribeToCollection<Memo>(
+      'memos',
+      (memos) => {
+        console.log('실시간 메모 업데이트:', memos);
+        dispatch({ type: 'SET_MEMOS', payload: memos });
+      },
+      {
+        userId: authState.user.uid,
+        orderByField: 'updatedAt',
+        orderDirection: 'desc'
+      }
+    );
+
+    return () => {
+      console.log('Firebase 실시간 리스너 해제');
+      unsubscribe();
+    };
+  }, [authState.user]);
 
   // 편의 메서드들
   const setMemos = useCallback((memos: Memo[]) => {
