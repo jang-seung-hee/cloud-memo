@@ -1,3 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* .design 폴더의 색상 변수 정의 */
+:root {
+  /* Primary 색상 */
+  --primary-gradient-start: #87ceeb;
+  --primary-gradient-end: #4682b4;
+  --primary-gradient-hover-start: #7bb8d9;
+  --primary-gradient-hover-end: #3d6b9a;
+  
+  /* Secondary 색상 */
+  --secondary-gradient-start: #f0f8ff;
+  --secondary-gradient-end: #b0e0e6;
+  
+  /* 텍스트 색상 */
+  --text-white: #ffffff;
+  --text-white-90: rgba(255, 255, 255, 0.9);
+  --text-white-70: rgba(255, 255, 255, 0.7);
+  
+  /* 그림자 */
+  --shadow-light: rgba(0, 0, 0, 0.1);
+  --shadow-medium: rgba(0, 0, 0, 0.15);
+  
+  /* 다크모드 색상 */
+  --dark-bg: #1c1c1e;
+  --dark-card: #23232a;
+  --dark-text: #f4f4f5;
+  --dark-point: #0a84ff;
+  --dark-border: #6b7280;
+  --dark-shadow: rgba(0,0,0,0.5);
+}
+
+/* 기본 스타일 */
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -5,9 +40,50 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #ffffff;
+  color: #333333;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* 다크모드 지원 - Tailwind 클래스로 대체하여 일관성 확보 */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: var(--dark-bg);
+    color: var(--dark-text);
+  }
+}
+
+/* 커스텀 유틸리티 클래스 */
+@layer components {
+  /* 그라데이션 버튼 */
+  .btn-primary {
+    @apply bg-gradient-to-r from-primary-start to-primary-end text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 hover:from-primary-hover-start hover:to-primary-hover-end hover:shadow-medium;
+  }
+  
+  /* 카드 스타일 - 다크모드 지원 */
+  .card {
+    @apply bg-white dark:bg-dark-card rounded-lg shadow-light dark:shadow-dark p-6 transition-all duration-200 hover:shadow-medium dark:hover:shadow-dark border border-gray-200 dark:border-dark-border;
+  }
+  
+  /* 입력 필드 - 다크모드 지원 */
+  .input-field {
+    @apply w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-start focus:border-transparent transition-all duration-200 bg-white dark:bg-dark-card text-gray-900 dark:text-dark-text placeholder-gray-500 dark:placeholder-dark-text-muted;
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 480px) {
+  /* 모바일 최적화 */
+}
+
+@media (max-width: 768px) {
+  /* 태블릿 최적화 */
+}
+
+@media (min-width: 769px) {
+  /* 데스크톱 최적화 */
 }
