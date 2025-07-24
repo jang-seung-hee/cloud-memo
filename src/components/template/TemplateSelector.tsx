@@ -101,8 +101,8 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
     }
   }, [templates, searchKeyword, selectedCategory, isOpen, handleSearch]);
 
-  // 카테고리 목록 추출
-  const categories = ['all', ...Array.from(new Set(templates.map(t => t.category)))];
+  // 카테고리 목록 추출 - 새로운 카테고리 시스템 적용
+  const categories = ['all', '임시', '기억', '보관'];
 
   return (
     <div className={`template-selector ${className}`}>
@@ -136,21 +136,49 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
             />
           </div>
 
-          {/* 카테고리 필터 */}
-          <div>
-            <div className="flex flex-wrap gap-2">
-              {categories.map((category) => (
-                <Button
-                  key={category}
-                  onClick={() => handleCategoryChange(category)}
-                  variant={selectedCategory === category ? 'primary' : 'outline'}
-                  size="sm"
-                >
-                  {category === 'all' ? '전체' : category}
-                </Button>
-              ))}
-            </div>
-          </div>
+                     {/* 카테고리 필터 */}
+           <div>
+             <div className="flex flex-wrap gap-2">
+               {categories.map((category) => {
+                 const getCategoryStyle = (cat: string) => {
+                   if (cat === 'all') {
+                     return selectedCategory === cat
+                       ? 'bg-gray-600 text-white shadow-md'
+                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-dark-bg-secondary dark:text-dark-text dark:hover:bg-dark-border';
+                   }
+                   if (cat === '임시') {
+                     return selectedCategory === cat
+                       ? 'bg-yellow-500 text-white shadow-md'
+                       : 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border border-yellow-200';
+                   }
+                   if (cat === '기억') {
+                     return selectedCategory === cat
+                       ? 'bg-blue-500 text-white shadow-md'
+                       : 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200';
+                   }
+                   if (cat === '보관') {
+                     return selectedCategory === cat
+                       ? 'bg-red-500 text-white shadow-md'
+                       : 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-200';
+                   }
+                   return selectedCategory === cat
+                     ? 'bg-primary-start text-white shadow-md'
+                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-dark-bg-secondary dark:text-dark-text dark:hover:bg-dark-border';
+                 };
+
+                 return (
+                   <button
+                     key={category}
+                     type="button"
+                     onClick={() => handleCategoryChange(category)}
+                     className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${getCategoryStyle(category)}`}
+                   >
+                     {category === 'all' ? '전체' : category}
+                   </button>
+                 );
+               })}
+             </div>
+           </div>
 
           {/* 상용구 목록 */}
           <div className="max-h-96 overflow-y-auto space-y-2">

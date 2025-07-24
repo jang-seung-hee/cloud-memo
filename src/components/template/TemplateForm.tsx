@@ -16,12 +16,12 @@ const TemplateForm: React.FC<TemplateFormProps> = ({
 }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [category, setCategory] = useState('일반');
+  const [category, setCategory] = useState('임시');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ title?: string; content?: string; category?: string }>({});
 
   // 카테고리 목록
-  const categories = ['일반', '코웨이', 'SK', '청호', '쿠쿠', '엘지', '웰스'];
+  const categories = ['임시', '기억', '보관'];
 
   // 편집 모드인 경우 기존 데이터 로드
   useEffect(() => {
@@ -141,17 +141,41 @@ const TemplateForm: React.FC<TemplateFormProps> = ({
             분류
           </label>
           <div className="flex-1">
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-dark-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-start focus:border-primary-start bg-white dark:bg-dark-card text-gray-900 dark:text-dark-text"
-            >
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
+            <div className="flex space-x-2">
+              {categories.map((cat) => {
+                const getCategoryStyle = (categoryName: string) => {
+                  if (categoryName === '임시') {
+                    return category === categoryName
+                      ? 'bg-yellow-500 text-white shadow-md'
+                      : 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border border-yellow-200';
+                  }
+                  if (categoryName === '기억') {
+                    return category === categoryName
+                      ? 'bg-blue-500 text-white shadow-md'
+                      : 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200';
+                  }
+                  if (categoryName === '보관') {
+                    return category === categoryName
+                      ? 'bg-red-500 text-white shadow-md'
+                      : 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-200';
+                  }
+                  return category === categoryName
+                    ? 'bg-primary-start text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-dark-bg-secondary dark:text-dark-text dark:hover:bg-dark-border';
+                };
+
+                return (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setCategory(cat)}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${getCategoryStyle(cat)}`}
+                  >
+                    {cat}
+                  </button>
+                );
+              })}
+            </div>
             {errors.category && (
               <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.category}</p>
             )}
@@ -176,19 +200,7 @@ const TemplateForm: React.FC<TemplateFormProps> = ({
             </div>
         </div>
 
-        {/* 미리보기 */}
-        {content.trim() && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-dark-text mb-2">
-              미리보기
-            </label>
-            <div className="p-3 bg-gray-50 dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border rounded-md">
-              <div className="whitespace-pre-wrap text-gray-700 dark:text-dark-text text-sm">
-                {content}
-              </div>
-            </div>
-          </div>
-        )}
+
 
         {/* 액션 버튼 */}
         <div className="flex justify-end space-x-3 pt-4 border-t">

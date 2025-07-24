@@ -23,7 +23,7 @@ const TemplateManagePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-secondary-start to-secondary-end dark:from-dark-bg dark:to-dark-bg-secondary overflow-x-hidden pb-20">
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
+      <div className="max-w-7xl mx-auto px-0 sm:px-2 lg:px-4 py-4 sm:py-8">
         {/* 동기화 상태 표시 */}
         {authState.user && (
           <div className="mb-4">
@@ -32,11 +32,11 @@ const TemplateManagePage: React.FC = () => {
         )}
 
         {/* 헤더 */}
-        <div className="mb-4 sm:mb-8">
+        <div className="mb-4 sm:mb-8 px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-dark-text">상용구 관리</h1>
-              <p className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600 dark:text-dark-text-muted">
+            <div className="text-left">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-dark-text text-left">상용구 관리</h1>
+              <p className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600 dark:text-dark-text-muted text-left">
                 자주 사용하는 문구를 등록하고 관리하세요
               </p>
             </div>

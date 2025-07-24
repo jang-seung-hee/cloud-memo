@@ -157,7 +157,7 @@ const MemoDetailPage: React.FC = () => {
       <div className="w-full h-full sm:max-w-4xl sm:mx-auto sm:px-6 sm:py-8">
         {/* 헤더 */}
                  <div className="sticky top-0 z-10 bg-gradient-to-br from-secondary-start to-secondary-end dark:from-dark-bg dark:to-dark-bg-secondary backdrop-blur-sm border-b border-gray-200 dark:border-dark-border sm:border-none sm:bg-transparent sm:backdrop-blur-none">
-           <div className="flex items-center justify-between p-4 sm:p-0 sm:mb-8">
+           <div className="flex items-center justify-between p-4 sm:p-0">
              <div className="flex items-center">
                <Button
                  onClick={() => navigate('/')}
@@ -204,27 +204,28 @@ const MemoDetailPage: React.FC = () => {
 
                  {/* 메모 상세 내용 */}
          <div className="px-4 sm:px-0">
-           <MemoDetail
-             memo={memo}
-             onEdit={handleEditMemo}
-             onDelete={handleDeleteMemo}
-           />
+           <div className="max-w-4xl mx-auto">
+             <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm border border-gray-200 dark:border-dark-border p-4 sm:p-6">
+               <MemoDetail
+                 memo={memo}
+                 onEdit={handleEditMemo}
+                 onDelete={handleDeleteMemo}
+               />
+               {/* 닫기 버튼 - 메모 내용 하단에 배치 */}
+               <div className="flex justify-end mt-6 pt-4 border-t border-gray-200 dark:border-dark-border">
+                 <Button
+                   onClick={() => navigate('/')}
+                   variant="outline"
+                   size="sm"
+                   className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+                 >
+                   닫기
+                 </Button>
+               </div>
+             </div>
+           </div>
 
-          {/* 관련 메모 - 데스크톱에서만 표시 */}
-          <Card className="hidden sm:block mt-6">
-            <div className="p-6">
-              <h3 className="text-lg font-semibold mb-4">관련 메모</h3>
-              <div className="text-center py-8">
-                <Icon name="FileText" size={48} className="mx-auto text-gray-400 mb-4" />
-                <p className="text-gray-600 mb-4">
-                  관련 메모 기능은 추후 업데이트 예정입니다.
-                </p>
-                <Button onClick={() => navigate('/')} variant="outline">
-                  전체 메모 보기
-                </Button>
-              </div>
-            </div>
-          </Card>
+
         </div>
 
         {/* 메모 수정 폼 모달 */}

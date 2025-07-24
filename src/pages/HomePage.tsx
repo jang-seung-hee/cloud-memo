@@ -96,16 +96,17 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-secondary-start to-secondary-end dark:from-dark-bg dark:to-dark-bg-secondary pb-20">
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
+      {/* 전체 컨텐츠를 왼쪽 정렬 */}
+      <div className="max-w-8xl px-16 sm:px-24 lg:px-32 xl:px-40 py-6">
         {/* 동기화 상태 표시 */}
         {authState.user && (
-          <div className="mb-4">
+          <div className="mb-4 text-left">
             <SyncStatus size="sm" showProgress={true} />
           </div>
         )}
 
         {/* 액션 버튼들과 검색 */}
-        <div className="mb-6">
+        <div className="mb-6 text-left">
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
             {/* 새 메모 버튼 */}
             <Button onClick={handleCreateMemo} variant="primary" className="flex items-center w-full sm:w-auto">
@@ -132,17 +133,17 @@ const HomePage: React.FC = () => {
         </div>
 
         {/* 메모 목록 */}
-        <div className="w-full">
+        <div className="w-full text-left">
           {isLoading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-start mx-auto"></div>
+            <div className="text-left py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-start"></div>
               <p className="mt-4 text-gray-600">메모를 불러오는 중...</p>
             </div>
           ) : filteredMemos.length === 0 ? (
-            <div className="text-center py-12">
+            <div className="text-left py-12">
               {searchKeyword ? (
                 <>
-                  <Icon name="Search" size={48} className="mx-auto text-gray-400 mb-4" />
+                  <Icon name="Search" size={48} className="text-gray-400 mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">검색 결과가 없습니다</h3>
                   <p className="text-gray-600 mb-4">
                     "{searchKeyword}"에 대한 메모를 찾을 수 없습니다.
@@ -156,7 +157,7 @@ const HomePage: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <Icon name="FileText" size={48} className="mx-auto text-gray-400 mb-4" />
+                  <Icon name="FileText" size={48} className="text-gray-400 mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">메모가 없습니다</h3>
                   <p className="text-gray-600 mb-4">첫 번째 메모를 작성해보세요!</p>
                   <Button onClick={handleCreateMemo} variant="primary">

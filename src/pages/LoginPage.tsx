@@ -3,6 +3,7 @@ import { useLocation, Navigate } from 'react-router-dom';
 import { useAuthContext } from '../contexts/AuthContext';
 import LoginButton from '../components/ui/LoginButton';
 import { Icon } from '../components/ui';
+import { QRCodeSVG } from 'qrcode.react';
 
 const LoginPage: React.FC = () => {
   const { state } = useAuthContext();
@@ -80,25 +81,41 @@ const LoginPage: React.FC = () => {
           <h4 className="font-semibold text-gray-900 dark:text-dark-text mb-4">
             주요 기능
           </h4>
-          <div className="space-y-3">
-            <div className="flex items-center space-x-3">
-              <Icon name="Cloud" size={16} className="text-blue-500" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                클라우드 동기화
-              </span>
+          <div className="flex">
+            <div className="flex-1 space-y-3">
+              <div className="flex items-center space-x-3">
+                <Icon name="Cloud" size={16} className="text-blue-500" />
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  클라우드 동기화
+                </span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Icon name="Smartphone" size={16} className="text-green-500" />
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  모든 기기에서 접근
+                </span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Icon name="Shield" size={16} className="text-purple-500" />
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  안전한 데이터 보호
+                </span>
+              </div>
             </div>
-            <div className="flex items-center space-x-3">
-              <Icon name="Smartphone" size={16} className="text-green-500" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                모든 기기에서 접근
-              </span>
-            </div>
-            <div className="flex items-center space-x-3">
-              <Icon name="Shield" size={16} className="text-purple-500" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                안전한 데이터 보호
-              </span>
-            </div>
+                         <div className="ml-6 flex items-center">
+               <div className="relative">
+                 <QRCodeSVG 
+                   value="https://cloud-memome.netlify.app/"
+                   size={80}
+                   level="M"
+                   includeMargin={true}
+                   className="rounded"
+                 />
+                 <div className="absolute -top-2 -right-2 w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center">
+                   <Icon name="RefreshCw" size={12} className="text-white animate-spin" />
+                 </div>
+               </div>
+             </div>
           </div>
         </div>
       </div>
