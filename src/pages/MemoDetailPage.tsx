@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Button, Icon, BottomTabBar } from '../components/ui';
+import { Button, Icon, BottomTabBar } from '../components/ui';
 import type { IconName } from '../components/ui/Icon';
 import { getMemo, deleteMemo } from '../services';
 import type { Memo } from '../types/memo';
