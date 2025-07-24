@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, Button, Input, Icon } from '../ui';
 import { getMemos, deleteMemo, searchMemos } from '../../services';
-import type { Memo, MemoCategory } from '../../types/memo';
+import type { Memo } from '../../types/memo';
 import MemoItem from './MemoItem';
 import MemoForm from './MemoForm';
 
