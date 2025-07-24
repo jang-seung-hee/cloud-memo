@@ -40,9 +40,9 @@ const Card: React.FC<CardProps> = ({
 }) => {
   const paddingClasses = {
     none: '',
-    sm: 'p-3',
-    md: 'p-6',
-    lg: 'p-8'
+    sm: 'p-2 sm:p-3',
+    md: 'p-4 sm:p-6',
+    lg: 'p-6 sm:p-8'
   };
   
   const shadowClasses = {
@@ -71,7 +71,7 @@ const Card: React.FC<CardProps> = ({
       )}
       
       {(title || subtitle) && (
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-dark-border">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 dark:border-dark-border">
           {title && (
             <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text mb-1">{title}</h3>
           )}
@@ -84,13 +84,13 @@ const Card: React.FC<CardProps> = ({
       {padding === 'none' ? (
         children
       ) : (
-        <div className="px-6 py-4">
+        <div className="px-4 sm:px-6 py-3 sm:py-4">
           {children}
         </div>
       )}
       
       {actions && (
-        <div className="px-6 py-4 border-t border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-bg-secondary">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-bg-secondary">
           {actions}
         </div>
       )}

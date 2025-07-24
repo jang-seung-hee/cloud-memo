@@ -97,7 +97,7 @@ const HomePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-secondary-start to-secondary-end dark:from-dark-bg dark:to-dark-bg-secondary pb-20">
       {/* 전체 컨텐츠를 왼쪽 정렬 */}
-      <div className="max-w-8xl px-16 sm:px-24 lg:px-32 xl:px-40 py-6">
+      <div className="max-w-8xl px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32 py-4 sm:py-6">
         {/* 동기화 상태 표시 */}
         {authState.user && (
           <div className="mb-4 text-left">

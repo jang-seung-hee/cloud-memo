@@ -131,7 +131,7 @@ const MemoDetailPage: React.FC = () => {
   if (isDeleted || !memo) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-secondary-start to-secondary-end dark:from-dark-bg dark:to-dark-bg-secondary pb-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
           <div className="text-center">
             <Icon name="FileText" size={64} className="mx-auto text-gray-400 dark:text-dark-text-muted mb-6" />
             <h1 className="text-3xl font-bold text-gray-900 dark:text-dark-text mb-4">메모를 찾을 수 없습니다</h1>
