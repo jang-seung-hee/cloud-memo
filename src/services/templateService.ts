@@ -14,12 +14,8 @@ import {
   isFirebaseAvailable, 
   getCurrentUserId,
   createDocument,
-  updateDocument,
-  deleteDocument,
   COLLECTIONS
 } from './firebaseService';
-import syncService from './syncService';
-import { SyncOperation } from '../types/sync';
 
 // 상용구 데이터 검증
 const validateTemplate = (template: Partial<Template>): boolean => {

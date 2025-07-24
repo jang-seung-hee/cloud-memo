@@ -4,12 +4,11 @@ import {
   safeJsonStringify
 } from './localStorageService';
 import { 
-  createDocument,
-  updateDocument,
-  deleteDocument,
-  uploadFile,
-  deleteFile,
-  COLLECTIONS
+  createDocument, 
+  updateDocument, 
+  deleteDocument, 
+  uploadFile, 
+  COLLECTIONS 
 } from './firebaseService';
 import { 
   SyncStatus, 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, FullscreenImageViewer } from '../ui';
+import { FullscreenImageViewer } from '../ui';
 import type { Memo } from '../../types/memo';
 
 interface MemoDetailProps {

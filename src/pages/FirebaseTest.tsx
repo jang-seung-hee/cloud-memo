@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button, Card, Modal } from '../components/ui';
 import { isFirebaseAvailable, getCurrentUserId } from '../services/firebaseService';
 import { useAuthContext } from '../contexts/AuthContext';

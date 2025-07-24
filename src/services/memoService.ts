@@ -24,8 +24,7 @@ import {
   deleteDocument,
   COLLECTIONS
 } from './firebaseService';
-import syncService from './syncService';
-import { SyncOperation } from '../types/sync';
+
 
 // 메모 데이터 검증
 const validateMemo = (memo: Partial<Memo>): boolean => {

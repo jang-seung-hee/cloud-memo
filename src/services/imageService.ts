@@ -13,12 +13,8 @@ import {
 import { 
   isFirebaseAvailable, 
   getCurrentUserId,
-  uploadFile,
-  deleteFile,
-  COLLECTIONS
+  uploadFile
 } from './firebaseService';
-import syncService from './syncService';
-import { SyncOperation } from '../types/sync';
 
 // 이미지 데이터 검증
 const validateImage = (image: Partial<Image>): boolean => {
