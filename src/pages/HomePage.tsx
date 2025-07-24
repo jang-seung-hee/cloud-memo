@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button, Icon } from '../components/ui';
 import { getMemos, deleteMemo, searchMemos } from '../services';
-import type { Memo } from '../types/memo';
+import type { Memo, MemoCategory } from '../types/memo';
 import MemoItem from '../components/memo/MemoItem';
 import MemoForm from '../components/memo/MemoForm';
 import SyncStatus from '../components/ui/SyncStatus';
@@ -12,6 +12,7 @@ const HomePage: React.FC = () => {
   const [memos, setMemos] = useState<Memo[]>([]);
   const [filteredMemos, setFilteredMemos] = useState<Memo[]>([]);
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<MemoCategory | '전체'>('전체');
   const [selectedMemo, setSelectedMemo] = useState<Memo | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -32,22 +33,54 @@ const HomePage: React.FC = () => {
     }
   };
 
-  // 검색 처리
+  // 검색 및 필터링 처리
   const handleSearch = useCallback((keyword: string) => {
     setSearchKeyword(keyword);
     
+    let filtered = memos;
+    
+    // 카테고리 필터링
+    if (selectedCategory !== '전체') {
+      filtered = filtered.filter(memo => memo.category === selectedCategory);
+    }
+    
+    // 검색어 필터링
     if (keyword.trim()) {
       try {
         const searchResults = searchMemos({ keyword });
-        setFilteredMemos(searchResults.memos);
+        filtered = filtered.filter(memo => 
+          searchResults.memos.some(searchMemo => searchMemo.id === memo.id)
+        );
       } catch (error) {
         console.error('검색 실패:', error);
-        setFilteredMemos([]);
+        filtered = [];
       }
-    } else {
-      setFilteredMemos(memos);
     }
-  }, [memos]);
+    
+    setFilteredMemos(filtered);
+  }, [memos, selectedCategory]);
+
+  // 카테고리 필터링
+  const handleCategoryFilter = useCallback((category: MemoCategory | '전체') => {
+    setSelectedCategory(category);
+    
+    let filtered = memos;
+    
+    // 카테고리 필터링
+    if (category !== '전체') {
+      filtered = filtered.filter(memo => memo.category === category);
+    }
+    
+    // 검색어 필터링
+    if (searchKeyword.trim()) {
+      filtered = filtered.filter(memo => 
+        memo.content.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+        (memo.title && memo.title.toLowerCase().includes(searchKeyword.toLowerCase()))
+      );
+    }
+    
+    setFilteredMemos(filtered);
+  }, [memos, searchKeyword]);
 
   // 새 메모 생성
   const handleCreateMemo = () => {
@@ -89,10 +122,10 @@ const HomePage: React.FC = () => {
     loadMemos();
   }, []);
 
-  // 검색어 변경 시 필터링
+  // 검색어 또는 카테고리 변경 시 필터링
   useEffect(() => {
     handleSearch(searchKeyword);
-  }, [memos, searchKeyword, handleSearch]);
+  }, [memos, searchKeyword, selectedCategory, handleSearch]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-secondary-start to-secondary-end dark:from-dark-bg dark:to-dark-bg-secondary pb-20">
@@ -106,7 +139,7 @@ const HomePage: React.FC = () => {
         )}
 
         {/* 액션 버튼들과 검색 */}
-        <div className="mb-6 text-left">
+        <div className="mb-2 text-left">
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
             {/* 새 메모 버튼 */}
             <Button onClick={handleCreateMemo} variant="primary" className="flex items-center w-full sm:w-auto">

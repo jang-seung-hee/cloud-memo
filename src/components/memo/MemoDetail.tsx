@@ -66,9 +66,21 @@ const MemoDetail: React.FC<MemoDetailProps> = ({
     <div className={`memo-detail text-left ${className}`}>
       {/* 제목 */}
       <div className="mb-2">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-dark-text">
-          {getDisplayTitle(memo)}
-        </h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-dark-text">
+            {getDisplayTitle(memo)}
+          </h2>
+          {/* 카테고리 뱃지 */}
+          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+            memo.category === '임시' 
+              ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+              : memo.category === '기억'
+              ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+              : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+          }`}>
+            {memo.category}
+          </span>
+        </div>
       </div>
       
       {/* ID 정보 */}

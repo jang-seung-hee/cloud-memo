@@ -56,7 +56,8 @@ const ServiceTest: React.FC = () => {
 
       const newMemo = createMemo({
         title: memoTitle.trim() || undefined, // 제목이 없으면 undefined
-        content: memoContent
+        content: memoContent,
+        category: '임시'
       });
 
       setMemos(getMemos());

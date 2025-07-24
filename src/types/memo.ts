@@ -4,6 +4,8 @@
 
 import { Image } from './image';
 
+export type MemoCategory = '임시' | '기억' | '보관';
+
 export interface Memo {
   /** 메모 고유 ID */
   id: string;
@@ -11,6 +13,8 @@ export interface Memo {
   title?: string;
   /** 메모 내용 */
   content: string;
+  /** 메모 카테고리 (임시/기억/보관) */
+  category: MemoCategory;
   /** 첨부된 이미지 목록 */
   images: Image[];
   /** 생성일시 */
@@ -24,6 +28,8 @@ export interface CreateMemoRequest {
   title?: string;
   /** 메모 내용 */
   content: string;
+  /** 메모 카테고리 (임시/기억/보관) */
+  category: MemoCategory;
   /** 첨부된 이미지 목록 */
   images?: Image[];
 }
@@ -33,6 +39,8 @@ export interface UpdateMemoRequest {
   title?: string;
   /** 메모 내용 */
   content?: string;
+  /** 메모 카테고리 (임시/기억/보관) */
+  category?: MemoCategory;
   /** 첨부된 이미지 목록 */
   images?: Image[];
 }

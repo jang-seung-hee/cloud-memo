@@ -66,8 +66,14 @@ const getMemos = (): Memo[] => {
       return [];
     }
 
+    // 기존 메모에 카테고리 필드가 없는 경우 기본값 추가
+    const processedMemos = memos.map(memo => ({
+      ...memo,
+      category: memo.category || '임시' // 기본값으로 '임시' 설정
+    }));
+
     // 최근 작성한 메모가 위쪽으로 오도록 정렬 (updatedAt 기준 내림차순)
-    return memos.sort((a, b) => {
+    return processedMemos.sort((a, b) => {
       const dateA = new Date(a.updatedAt || a.createdAt);
       const dateB = new Date(b.updatedAt || b.createdAt);
       return dateB.getTime() - dateA.getTime();
@@ -95,6 +101,7 @@ const createMemo = (request: CreateMemoRequest): Memo => {
     id: generateId(),
     title: title,
     content: request.content.trim(),
+    category: request.category,
     images: request.images || [],
     createdAt: new Date(),
     updatedAt: new Date().toISOString()
@@ -138,7 +145,15 @@ const createMemo = (request: CreateMemoRequest): Memo => {
 // 메모 조회
 const getMemo = (id: string): Memo | null => {
   const memos = getMemos();
-  return memos.find(memo => memo.id === id) || null;
+  const memo = memos.find(memo => memo.id === id);
+  if (memo) {
+    // 카테고리가 없는 경우 기본값 추가
+    return {
+      ...memo,
+      category: memo.category || '임시'
+    };
+  }
+  return null;
 };
 
 // 메모 수정
@@ -176,6 +191,7 @@ const updateMemo = (id: string, request: UpdateMemoRequest): Memo => {
     ...currentMemo,
     title: newTitle,
     content: newContent,
+    ...(request.category && { category: request.category }),
     ...(request.images && { images: request.images }),
     updatedAt: new Date().toISOString()
   };

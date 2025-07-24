@@ -24,6 +24,7 @@ const PerformanceTest: React.FC = () => {
         content: `이것은 성능 테스트를 위한 메모 ${i + 1}입니다. ` + 
                 `긴 내용을 포함하여 실제 사용 환경을 시뮬레이션합니다. ` +
                 `이 메모는 다양한 길이의 텍스트를 포함하고 있어 렌더링 성능을 테스트할 수 있습니다.`,
+        category: '임시',
         images: [],
         createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
         updatedAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString()

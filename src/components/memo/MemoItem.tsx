@@ -168,9 +168,21 @@ const MemoItem: React.FC<MemoItemProps> = memo(({
           {/* 헤더 */}
           <div className="mb-3">
             <div className="flex-1 min-w-0">
-              <h3 className="text-lg sm:text-base font-semibold text-gray-900 dark:text-dark-text mb-1 line-clamp-2 leading-tight text-left">
-                {displayTitle}
-              </h3>
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="text-lg sm:text-base font-semibold text-gray-900 dark:text-dark-text line-clamp-2 leading-tight text-left flex-1">
+                  {displayTitle}
+                </h3>
+                {/* 카테고리 뱃지 */}
+                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
+                  memo.category === '임시' 
+                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                    : memo.category === '기억'
+                    ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                    : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                }`}>
+                  {memo.category}
+                </span>
+              </div>
               <div className="flex items-center text-sm sm:text-xs text-gray-500 dark:text-dark-text-muted">
                 <span>내 메모</span>
                 <span className="mx-2">•</span>

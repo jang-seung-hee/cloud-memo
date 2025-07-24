@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Modal, Button, Icon } from '../ui';
 import { createMemo, updateMemo, getTemplates } from '../../services';
 import { processImage } from '../../utils/imageUtils';
-import type { Memo } from '../../types/memo';
+import type { Memo, MemoCategory } from '../../types/memo';
 import type { Image } from '../../types/image';
 import type { Template } from '../../types/template';
 
@@ -18,23 +18,177 @@ const MemoForm: React.FC<MemoFormProps> = ({
   onSubmit
 }) => {
   const [content, setContent] = useState('');
+  const [category, setCategory] = useState<MemoCategory>('임시');
   const [images, setImages] = useState<Image[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ content?: string }>({});
   const [showTemplateSidebar, setShowTemplateSidebar] = useState(false);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
+  const [isProcessingClipboard, setIsProcessingClipboard] = useState(false);
+  const [clipboardMessage, setClipboardMessage] = useState<string>('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  // 모바일 환경 감지
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
   // 편집 모드인 경우 기존 데이터 로드
   useEffect(() => {
     if (memo) {
       setContent(memo.content);
+      setCategory(memo.category);
       setImages(memo.images || []);
     }
   }, [memo]);
+
+  // 클립보드 이미지 처리 (PC용)
+  const handleClipboardPaste = async (e: React.ClipboardEvent) => {
+    // 모바일에서는 전역 이벤트 리스너가 처리하므로 PC에서만 실행
+    if (isMobile) return;
+    
+    const items = e.clipboardData.items;
+    let hasImage = false;
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      
+      if (item.type.startsWith('image/')) {
+        e.preventDefault();
+        hasImage = true;
+        
+        try {
+          setIsProcessingClipboard(true);
+          setClipboardMessage('');
+          const file = item.getAsFile();
+          
+          if (file) {
+            console.log('PC 클립보드에서 이미지 감지:', file.name, file.size, file.type);
+            
+            const result = await processImage(file, {
+              maxWidth: 1200,
+              maxHeight: 800,
+              quality: 0.8
+            });
+
+            const image: Image = {
+              id: `img_${Date.now()}_pc_clipboard`,
+              data: result.dataUrl,
+              name: `pc_clipboard_${Date.now()}.${file.type.split('/')[1] || 'jpg'}`,
+              size: result.file.size,
+              type: result.file.type,
+              thumbnail: result.thumbnail?.dataUrl,
+              uploadedAt: new Date()
+            };
+
+            setImages(prev => [...prev, image]);
+            setClipboardMessage('✅ 이미지가 성공적으로 추가되었습니다!');
+            console.log('PC 클립보드 이미지 추가 완료');
+            
+            // 3초 후 메시지 제거
+            setTimeout(() => setClipboardMessage(''), 3000);
+          }
+        } catch (error) {
+          console.error('PC 클립보드 이미지 처리 실패:', error);
+          setClipboardMessage('❌ 이미지 처리에 실패했습니다.');
+          setTimeout(() => setClipboardMessage(''), 3000);
+        } finally {
+          setIsProcessingClipboard(false);
+        }
+        break;
+      }
+    }
+  };
+
+  // 모바일 클립보드 API 지원 확인 및 처리
+  useEffect(() => {
+    const handlePaste = async (e: ClipboardEvent) => {
+      // textarea가 포커스되어 있을 때만 처리
+      if (document.activeElement !== textareaRef.current) {
+        return;
+      }
+
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      let hasImage = false;
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        
+        if (item.type.startsWith('image/')) {
+          e.preventDefault();
+          hasImage = true;
+          
+          try {
+            setIsProcessingClipboard(true);
+            setClipboardMessage('');
+            const file = item.getAsFile();
+            
+            if (file) {
+              console.log('모바일 클립보드에서 이미지 감지:', file.name, file.size, file.type);
+              
+              const result = await processImage(file, {
+                maxWidth: 1200,
+                maxHeight: 800,
+                quality: 0.8
+              });
+
+              const image: Image = {
+                id: `img_${Date.now()}_mobile_clipboard`,
+                data: result.dataUrl,
+                name: `mobile_clipboard_${Date.now()}.${file.type.split('/')[1] || 'jpg'}`,
+                size: result.file.size,
+                type: result.file.type,
+                thumbnail: result.thumbnail?.dataUrl,
+                uploadedAt: new Date()
+              };
+
+              setImages(prev => [...prev, image]);
+              setClipboardMessage('✅ 이미지가 성공적으로 추가되었습니다!');
+              console.log('모바일 클립보드 이미지 추가 완료');
+              
+              // 3초 후 메시지 제거
+              setTimeout(() => setClipboardMessage(''), 3000);
+            }
+          } catch (error) {
+            console.error('모바일 클립보드 이미지 처리 실패:', error);
+            setClipboardMessage('❌ 이미지 처리에 실패했습니다.');
+            setTimeout(() => setClipboardMessage(''), 3000);
+          } finally {
+            setIsProcessingClipboard(false);
+          }
+          break;
+        }
+      }
+    };
+
+    // 모바일에서만 전역 paste 이벤트 리스너 추가
+    if (isMobile) {
+      document.addEventListener('paste', handlePaste);
+      
+      return () => {
+        document.removeEventListener('paste', handlePaste);
+      };
+    }
+  }, [isMobile]);
+
+
+
+  // 클립보드 접근 권한 확인 및 요청
+  const requestClipboardPermission = async () => {
+    if (navigator.clipboard && navigator.permissions) {
+      try {
+        const result = await navigator.permissions.query({ name: 'clipboard-read' as PermissionName });
+        console.log('클립보드 권한 상태:', result.state);
+        return result.state;
+      } catch (error) {
+        console.log('클립보드 권한 확인 실패:', error);
+        return 'denied';
+      }
+    }
+    return 'granted'; // 기본적으로 허용
+  };
 
   // 카메라 촬영
   const handleCameraCapture = () => {
@@ -202,6 +356,7 @@ const MemoForm: React.FC<MemoFormProps> = ({
         // 생성 모드
         await createMemo({
           content: content.trim(),
+          category: category,
           images: images
         });
       }
@@ -242,7 +397,7 @@ const MemoForm: React.FC<MemoFormProps> = ({
       isOpen={true}
       title={memo ? '메모 수정' : '새 메모 작성'}
       onClose={handleCancel}
-      size="xl"
+      size="2xl"
     >
       {/* 숨겨진 파일 입력들 */}
       <input
@@ -262,49 +417,92 @@ const MemoForm: React.FC<MemoFormProps> = ({
         className="hidden"
       />
 
-      <div className="space-y-4">
+      <div className="space-y-2">
+        {/* 카테고리 선택 및 미디어 액션 */}
+        <div className="flex items-center justify-between">
+          <div className="flex space-x-1">
+            {(['임시', '기억', '보관'] as MemoCategory[]).map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setCategory(cat)}
+                className={`px-1.5 py-0.5 rounded text-xs font-medium transition-all duration-200 ${
+                  category === cat
+                    ? cat === '임시'
+                      ? 'bg-orange-500 text-white'
+                      : cat === '기억'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-red-500 text-white'
+                    : cat === '임시'
+                    ? 'bg-orange-100 text-orange-700 border border-orange-200 hover:bg-orange-200'
+                    : cat === '기억'
+                    ? 'bg-blue-100 text-blue-700 border border-blue-200 hover:bg-blue-200'
+                    : 'bg-red-100 text-red-700 border border-red-200 hover:bg-red-200'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+          
+          {/* 미디어 액션 아이콘들 */}
+          <div className="flex space-x-1">
+            <button
+              type="button"
+              onClick={handleCameraCapture}
+              className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+              title="카메라로 촬영"
+            >
+              <Icon name="Camera" size={14} className="text-gray-600" />
+            </button>
+            <button
+              type="button"
+              onClick={handleGallerySelect}
+              className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+              title="갤러리에서 선택"
+            >
+              <Icon name="Image" size={14} className="text-gray-600" />
+            </button>
+            <button
+              type="button"
+              onClick={handleOpenTemplateSidebar}
+              className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+              title="상용구 선택"
+            >
+              <Icon name="FileText" size={14} className="text-gray-600" />
+            </button>
+          </div>
+        </div>
+
         {/* 내용 입력 */}
         <div>
-          <div className="flex justify-end mb-2">
-            <div className="flex space-x-1">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center px-1.5 py-0.5 text-xs bg-gradient-to-r from-primary-start to-primary-end text-white border border-primary-start shadow-sm hover:from-primary-end hover:to-primary-start"
-                onClick={handleCameraCapture}
-              >
-                <Icon name="Camera" size={10} />
-                <span className="ml-0.5">카메라</span>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center px-1.5 py-0.5 text-xs bg-gradient-to-r from-primary-start to-primary-end text-white border border-primary-start shadow-sm hover:from-primary-end hover:to-primary-start"
-                onClick={handleGallerySelect}
-              >
-                <Icon name="Image" size={10} />
-                <span className="ml-0.5">갤러리</span>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center px-1.5 py-0.5 text-xs bg-gradient-to-r from-primary-start to-primary-end text-white border border-primary-start shadow-sm hover:from-primary-end hover:to-primary-start"
-                onClick={handleOpenTemplateSidebar}
-              >
-                <Icon name="Copy" size={10} />
-                <span className="ml-0.5">상용구</span>
-              </Button>
-            </div>
+          <div className="flex items-center space-x-2 mb-1">
+            {clipboardMessage && (
+              <div className="text-xs px-2 py-1 rounded bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+                {clipboardMessage}
+              </div>
+            )}
           </div>
-          <textarea
-            ref={textareaRef}
-            placeholder="메모 내용을 입력하세요"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="w-full h-64 px-3 py-2 border border-gray-300 dark:border-dark-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-start focus:border-primary-start resize-none text-gray-900 dark:text-dark-text bg-white dark:bg-dark-card"
-            style={{ fontFamily: 'inherit' }}
-          />
+          <div className="relative">
+            <textarea
+              ref={textareaRef}
+              placeholder="메모 내용을 입력하세요 (Ctrl+V로 이미지 붙여넣기 가능)"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onPaste={handleClipboardPaste}
+              className="w-full h-96 px-3 py-2 border border-gray-300 dark:border-dark-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-start focus:border-primary-start resize-none text-gray-900 dark:text-dark-text bg-white dark:bg-dark-card"
+              style={{ fontFamily: 'inherit' }}
+            />
+            {isProcessingClipboard && (
+              <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center rounded-md">
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-start"></div>
+                  <span className="text-sm text-gray-600">이미지 처리 중...</span>
+                </div>
+              </div>
+            )}
+          </div>
           {errors.content && (
             <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.content}</p>
           )}
